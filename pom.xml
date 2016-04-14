@@ -101,8 +101,8 @@
   </properties>
 
   <modules>
-    <!--module>fabric8-profiles-core</module>
-    <module>fabric8-profiles-maven-plugin</module-->
+    <module>fabric8-profiles-core</module>
+    <module>fabric8-profiles-maven-plugin</module>
   </modules>
 
   <dependencyManagement>

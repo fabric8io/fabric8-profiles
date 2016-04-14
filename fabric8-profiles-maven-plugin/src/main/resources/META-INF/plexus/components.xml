@@ -25,10 +25,10 @@
       <configuration>
         <phases>
           <generate-sources>
-            io.fabric8:fabric8-profiles-maven-plugin:generate
+            io.fabric8.profiles:fabric8-profiles-maven-plugin:generate
           </generate-sources>
           <install>
-            io.fabric8:fabric8-profiles-maven-plugin:install
+            io.fabric8.profiles:fabric8-profiles-maven-plugin:install
           </install>
         </phases>
       </configuration>

@@ -19,11 +19,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>@project.groupId@</groupId>
-  <artifactId>@project.artifactId@-it</artifactId>
+  <artifactId>profiles-sample-project</artifactId>
   <version>@project.version@</version>
   <packaging>fabric8-profiles</packaging>
 
-  <description>A simple IT verifying the basic use case.</description>
+  <description>Fabric8 Profiles sample project</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
