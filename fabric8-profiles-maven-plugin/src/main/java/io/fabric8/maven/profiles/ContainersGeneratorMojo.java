@@ -15,17 +15,12 @@
  */
 package io.fabric8.maven.profiles;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -106,7 +101,7 @@ public class ContainersGeneratorMojo extends AbstractProfilesMojo {
                     final Class<?> aClass = classLoader.loadClass(className);
                     final Class<? extends ProjectReifier> reifierClass = aClass.asSubclass(ProjectReifier.class);
                     final Constructor<? extends ProjectReifier> constructor = reifierClass.getConstructor(Properties.class);
-                    reifiers.put(KarafProjectReifier.CONTAINER_TYPE, constructor.newInstance(properties));
+                    reifiers.put(type, constructor.newInstance(properties));
                 } catch (ClassCastException e) {
                     throwMojoException("Class is not of type ProjectReifier", className, e);
                 } catch (ReflectiveOperationException e) {
@@ -150,25 +145,4 @@ public class ContainersGeneratorMojo extends AbstractProfilesMojo {
         }
     }
 
-    protected ClassLoader getProjectClassLoader() throws MojoExecutionException {
-        final List classpathElements;
-        try {
-            classpathElements = project.getRuntimeClasspathElements();
-        } catch (org.apache.maven.artifact.DependencyResolutionRequiredException e) {
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
-        final URL[] urls = new URL[classpathElements.size()];
-        int i = 0;
-        for (Iterator it = classpathElements.iterator(); it.hasNext(); i++) {
-            try {
-                urls[i] = new File((String) it.next()).toURI().toURL();
-                log.debug("Adding project path " + urls[i]);
-            } catch (MalformedURLException e) {
-                throw new MojoExecutionException(e.getMessage(), e);
-            }
-        }
-
-        final ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-        return new URLClassLoader(urls, tccl != null ? tccl : getClass().getClassLoader());
-    }
 }

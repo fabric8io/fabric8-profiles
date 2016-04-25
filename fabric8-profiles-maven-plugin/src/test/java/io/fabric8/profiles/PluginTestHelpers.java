@@ -27,14 +27,15 @@ import java.nio.file.Paths;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
 
-public class TestHelpers {
+public class PluginTestHelpers {
 
     static final public Path PROJECT_BASE_DIR;
 
     static {
         try {
-            URL location = TestHelpers.class.getProtectionDomain().getCodeSource().getLocation();
+            URL location = PluginTestHelpers.class.getProtectionDomain().getCodeSource().getLocation();
             Path path = Paths.get(location.toURI());
             PROJECT_BASE_DIR = path.resolve("../..").normalize();
         } catch (Throwable e) {
@@ -93,7 +94,12 @@ public class TestHelpers {
         Git sourceRepo = Git.init().setDirectory(sourceDirectory.toFile()).call();
         sourceRepo.add().addFilepattern(".").call();
         sourceRepo.commit().setMessage("Adding version 1.0").call();
-        sourceRepo.branchRename().setNewName("1.0").call();
+        try {
+            sourceRepo.branchRename().setNewName("1.0").call();
+        } catch (RefAlreadyExistsException ignore) {
+            // ignore
+        }
+
         return sourceRepo;
     }
 }

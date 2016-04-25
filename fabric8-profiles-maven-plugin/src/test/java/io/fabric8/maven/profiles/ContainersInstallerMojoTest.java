@@ -19,13 +19,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import io.fabric8.profiles.ProfilesHelpers;
-import io.fabric8.profiles.TestHelpers;
+import io.fabric8.profiles.PluginTestHelpers;
 
 import org.codehaus.plexus.PlexusTestCase;
 import org.eclipse.jgit.api.Git;
 import org.junit.Test;
 
-import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
+import static io.fabric8.profiles.PluginTestHelpers.PROJECT_BASE_DIR;
 
 /**
  * Test container repository update using Mojo.
@@ -50,9 +50,9 @@ public class ContainersInstallerMojoTest extends PlexusTestCase {
         installerMojo.sourceDirectory = sourceDir.toFile();
         installerMojo.targetDirectory = target.toFile();
 
-        try (Git ignored = TestHelpers.initRepo(sourceDir)) {
+        try (Git ignored = PluginTestHelpers.initRepo(sourceDir)) {
 
-            TestHelpers.createTestRepos(repoSource);
+//            TestHelpers.createTestRepos(repoSource);
 
             // generate containers
             ContainersGeneratorMojo generatorMojo = new ContainersGeneratorMojo();

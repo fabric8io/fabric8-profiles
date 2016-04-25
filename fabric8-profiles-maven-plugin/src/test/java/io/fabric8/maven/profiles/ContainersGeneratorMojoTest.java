@@ -19,7 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import io.fabric8.profiles.ProfilesHelpers;
-import io.fabric8.profiles.TestHelpers;
+import io.fabric8.profiles.PluginTestHelpers;
 
 import org.codehaus.plexus.PlexusTestCase;
 import org.junit.Test;
@@ -34,8 +34,8 @@ public class ContainersGeneratorMojoTest extends PlexusTestCase {
         // set mojo parameters
         ContainersGeneratorMojo generator = new ContainersGeneratorMojo();
 
-        generator.sourceDirectory = TestHelpers.PROJECT_BASE_DIR.resolve("target/it/it-repo").toFile();
-        final Path target = TestHelpers.PROJECT_BASE_DIR.resolve("target/generated-containers");
+        generator.sourceDirectory = PluginTestHelpers.PROJECT_BASE_DIR.resolve("target/it/it-repo").toFile();
+        final Path target = PluginTestHelpers.PROJECT_BASE_DIR.resolve("target/generated-containers");
         ProfilesHelpers.deleteDirectory(target);
         Files.createDirectories(target);
 

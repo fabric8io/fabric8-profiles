@@ -16,6 +16,7 @@
 package io.fabric8.maven.profiles;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,20 +25,18 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.containers.GitRemoteProcessor;
+import io.fabric8.profiles.containers.ProjectProcessor;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.errors.NoRemoteRepositoryException;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -49,12 +48,18 @@ import org.eclipse.jgit.revwalk.RevCommit;
 //@Execute(lifecycle = "fabric8-profiles", phase = LifecyclePhase.INSTALL)
 public class ContainersInstallerMojo extends AbstractProfilesMojo {
 
-    protected static final String GIT_REMOTE_URI_PROPERTY = "gitRemoteUri";
-    protected static final String GIT_REMOTE_NAME_PROPERTY = "gitRemoteName";
-    protected static final String GIT_REMOTE_URI_PATTERN_PROPERTY = "gitRemoteUriPattern";
+    private static final String CURRENT_VERSION_PROPERTY = "currentVersion";
+    private static final String CURRENT_COMMIT_ID_PROPERTY = "currentCommitId";
 
-    private String currentVersion;
+    /**
+     * Project processor list, applied in sequence.
+     * Default is to use {@link io.fabric8.profiles.containers.GitRemoteProcessor}.
+     */
+    @Parameter(readonly = false, required = false)
+    protected List<Processor> projectProcessors;
+
     private ObjectId currentCommitId;
+    private ProjectProcessor[] processors;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -65,11 +70,41 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
         // get current repository branch version to compare against remotes
         try (final Git sourceRepo = Git.open(sourceDirectory)) {
 
-            currentVersion = sourceRepo.getRepository().getBranch();
+            String currentVersion = sourceRepo.getRepository().getBranch();
 
-            Iterable<RevCommit> commitLog = sourceRepo.log().setMaxCount(1).call();
-            for (RevCommit revCommit : commitLog) {
+            for (RevCommit revCommit : sourceRepo.log().setMaxCount(1).call()) {
                 currentCommitId = revCommit.getId();
+            }
+
+            // add current version and commit id to config
+            profilesProperties.setProperty(CURRENT_VERSION_PROPERTY, currentVersion);
+            profilesProperties.setProperty(CURRENT_COMMIT_ID_PROPERTY, currentCommitId.name());
+
+            // build processor list
+            if (projectProcessors != null && !projectProcessors.isEmpty()) {
+
+                processors = new ProjectProcessor[projectProcessors.size()];
+                int i = 0;
+                for (Processor processor : projectProcessors) {
+
+                    final String className = processor.getName();
+                    try {
+                        ClassLoader classLoader = getProjectClassLoader();
+                        final Class<?> aClass = classLoader.loadClass(className);
+                        final Class<? extends ProjectProcessor> reifierClass = aClass.asSubclass(ProjectProcessor.class);
+                        final Constructor<? extends ProjectProcessor> constructor = reifierClass.getConstructor(Properties.class);
+
+                        Properties properties = new Properties(profilesProperties);
+                        properties.putAll(processor.getProperties());
+                        processors[i++] = constructor.newInstance(properties);
+                    } catch (ClassCastException e) {
+                        throwMojoException("Class is not of type ProjectProcessor", className, e);
+                    } catch (ReflectiveOperationException e) {
+                        throwMojoException("Error loading ProjectProcessor", className, e);
+                    }
+                }
+            } else {
+                processors = new ProjectProcessor[] { new GitRemoteProcessor(profilesProperties) };
             }
 
             // list all containers, and update under targetDirectory
@@ -103,7 +138,8 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
         // read container config
         Properties config = null;
         try {
-            config = ProfilesHelpers.readPropertiesFile(configFile);
+            config = new Properties(profilesProperties);
+            config.putAll(ProfilesHelpers.readPropertiesFile(configFile));
         } catch (IOException e) {
             throwMojoException("Error reading container configuration", configFile, e);
         }
@@ -117,90 +153,14 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
             throw new MojoExecutionException("Missing generated container " + containerDir);
         }
 
-        // get or create remote repo URL
-        String remoteUri = config.getProperty(GIT_REMOTE_URI_PROPERTY);
-        if (remoteUri == null || remoteUri.isEmpty()) {
-            remoteUri = getRemoteUri(name);
-        }
-
-        // try to clone remote repo in temp dir
-        String remote = config.getProperty(GIT_REMOTE_NAME_PROPERTY, Constants.DEFAULT_REMOTE_NAME);
-        Path tempDirectory = null;
-        try {
-            tempDirectory = Files.createTempDirectory(containerDir, "cloned-remote-");
-        } catch (IOException e) {
-            throwMojoException("Error cloning ", remoteUri, e);
-        }
-        try (Git clonedRepo = Git.cloneRepository()
-            .setDirectory(tempDirectory.toFile())
-            .setBranch(currentVersion)
-            .setRemote(remote)
-            .setURI(remoteUri)
-            .call()) {
-
-            // handle missing remote branch
-            if (!clonedRepo.getRepository().getBranch().equals(currentVersion)) {
-                clonedRepo.branchCreate()
-                    .setName(currentVersion)
-                    .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
-                    .call();
-            }
-
-            // move .git dir to parent and drop old source altogether
-            // TODO things like .gitignore, etc. need to be handled, perhaps through Profiles??
-            Files.move(tempDirectory.resolve(".git"), containerDir.resolve(".git"));
-
-        } catch (InvalidRemoteException e) {
-            // TODO handle creating new remote repo in github, gogs, etc. using fabric8 devops connector
-            if (e.getCause() instanceof NoRemoteRepositoryException) {
-                throwMojoException("Remote repo creation not supported for container", name, e);
-            }
-            throwMojoException("Error cloning ", remoteUri, e);
-        } catch (GitAPIException e) {
-            throwMojoException("Error cloning ", remoteUri, e);
-        } catch (IOException e) {
-            throwMojoException("Error copying files from ", remoteUri, e);
-        } finally {
-            // cleanup tempDirectory
+        // process reified container
+        for (ProjectProcessor processor : processors) {
             try {
-                ProfilesHelpers.deleteDirectory(tempDirectory);
+                processor.process(name, config, containerDir);
             } catch (IOException e) {
-                // ignore
+                throwMojoException("Error processing container", name, e);
             }
         }
-
-        try (Git containerRepo = Git.open(containerDir.toFile())) {
-
-            // diff with remote
-            List<DiffEntry> diffEntries = containerRepo.diff().call();
-            if (!diffEntries.isEmpty()) {
-
-                // add all changes
-                containerRepo.add().addFilepattern(".").call();
-
-                // with latest Profile repo commit ID in message
-                // TODO provide other identity properties
-                containerRepo.commit().setMessage("Container updated for commit " + currentCommitId.name()).call();
-
-                // push to remote
-                containerRepo.push().setRemote(remote).call();
-            } else {
-                log.debug("No changes to container" + name);
-            }
-
-        } catch (GitAPIException e) {
-            throwMojoException("Error processing container Git repo ", containerDir, e);
-        } catch (IOException e) {
-            throwMojoException("Error reading container Git repo ", containerDir, e);
-        }
-    }
-
-    private String getRemoteUri(String name) throws MojoExecutionException {
-        String gitRemotePattern = profilesProperties.getProperty(GIT_REMOTE_URI_PATTERN_PROPERTY);
-        if (gitRemotePattern == null) {
-            throw new MojoExecutionException("Missing property " + GIT_REMOTE_URI_PATTERN_PROPERTY);
-        }
-        return gitRemotePattern.replace("${name}", name);
     }
 
 }

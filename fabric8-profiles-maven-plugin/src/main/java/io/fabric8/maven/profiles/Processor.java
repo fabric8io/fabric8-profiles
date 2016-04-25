@@ -13,16 +13,31 @@
  *  implied.  See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-import io.fabric8.profiles.PluginTestHelpers
-import org.eclipse.jgit.api.Git
+package io.fabric8.maven.profiles;
 
-import java.nio.file.Paths
-// init a git repo in basedir
-Git repo = PluginTestHelpers.initRepo(Paths.get(basedir.toURI()))
+import java.util.Properties;
 
-assert repo.getRepository().getBranch() == "1.0"
+/**
+ * Configurable {@link io.fabric8.profiles.containers.ProjectProcessor} for {@link ContainersInstallerMojo} mojo.
+ */
+public class Processor {
 
-// create remote repos for containers
-//PluginTestHelpers.createTestRepos(Paths.get(basedir.toURI()))
+    private String name;
+    private Properties properties;
 
-repo.close()
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Properties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Properties properties) {
+        this.properties = properties;
+    }
+}

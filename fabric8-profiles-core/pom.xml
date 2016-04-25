@@ -30,6 +30,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>io.fabric8</groupId>
+      <artifactId>gitrepo-api</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
     </dependency>
@@ -41,6 +46,11 @@
     <dependency>
       <groupId>org.apache.velocity</groupId>
       <artifactId>velocity</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jgit</groupId>
+      <artifactId>org.eclipse.jgit</artifactId>
     </dependency>
 
     <!-- logging -->
