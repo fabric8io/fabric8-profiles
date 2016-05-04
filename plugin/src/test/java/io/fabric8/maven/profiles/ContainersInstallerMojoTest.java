@@ -23,6 +23,7 @@ import io.fabric8.profiles.PluginTestHelpers;
 
 import org.codehaus.plexus.PlexusTestCase;
 import org.eclipse.jgit.api.Git;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static io.fabric8.profiles.PluginTestHelpers.PROJECT_BASE_DIR;
@@ -30,6 +31,7 @@ import static io.fabric8.profiles.PluginTestHelpers.PROJECT_BASE_DIR;
 /**
  * Test container repository update using Mojo.
  */
+@Ignore("[#2] Default build fails with UnknownHostException")
 public class ContainersInstallerMojoTest extends PlexusTestCase {
 
     @Test
