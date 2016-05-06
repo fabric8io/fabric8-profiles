@@ -24,7 +24,7 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.build.directory}/it/it-repo/</directory>
+      <directory>${project.build.directory}/it/repos</directory>
       <outputDirectory>/</outputDirectory>
       <useDefaultExcludes>false</useDefaultExcludes>
       <excludes>

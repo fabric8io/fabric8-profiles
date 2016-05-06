@@ -23,18 +23,20 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import io.fabric8.profiles.ProfilesHelpers;
-
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+
+import io.fabric8.profiles.ProfilesHelpers;
 
 /**
  * Base class for Profiles mojos.
@@ -124,15 +126,20 @@ public abstract class AbstractProfilesMojo extends AbstractMojo {
     }
 
     protected ClassLoader getProjectClassLoader() throws MojoExecutionException {
-        final List classpathElements;
-        try {
-            classpathElements = project.getRuntimeClasspathElements();
-        } catch (org.apache.maven.artifact.DependencyResolutionRequiredException e) {
-            throw new MojoExecutionException(e.getMessage(), e);
+        List<String> classpathElements = Collections.emptyList();
+        if (project != null) {
+            try {
+                List<String> elements = project.getRuntimeClasspathElements();
+                if (elements != null) {
+                	classpathElements = elements;
+                }
+            } catch (DependencyResolutionRequiredException e) {
+                throw new MojoExecutionException(e.getMessage(), e);
+            }
         }
-        final URL[] urls = new URL[classpathElements.size()];
+        URL[] urls = new URL[classpathElements.size()];
         int i = 0;
-        for (Iterator it = classpathElements.iterator(); it.hasNext(); i++) {
+        for (Iterator<String> it = classpathElements.iterator(); it.hasNext(); i++) {
             try {
                 urls[i] = new File((String) it.next()).toURI().toURL();
                 log.debug("Adding project path " + urls[i]);
@@ -141,7 +148,7 @@ public abstract class AbstractProfilesMojo extends AbstractMojo {
             }
         }
 
-        final ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         return new URLClassLoader(urls, tccl != null ? tccl : getClass().getClassLoader());
     }
 }

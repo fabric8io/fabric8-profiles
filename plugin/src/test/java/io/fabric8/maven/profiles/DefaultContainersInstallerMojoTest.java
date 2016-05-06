@@ -32,7 +32,7 @@ import static io.fabric8.profiles.PluginTestHelpers.PROJECT_BASE_DIR;
  * Test container repository update using Mojo.
  */
 @Ignore("[#2] Default build fails with UnknownHostException")
-public class ContainersInstallerMojoTest extends PlexusTestCase {
+public class DefaultContainersInstallerMojoTest extends PlexusTestCase {
 
     @Test
     public void testExecute() throws Exception {

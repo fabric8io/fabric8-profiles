@@ -13,48 +13,48 @@
  *  implied.  See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-package io.fabric8.profiles.containers.karaf;
+package io.fabric8.profiles.containers.wildfly;
+
+import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-import io.fabric8.profiles.Profiles;
-import io.fabric8.profiles.ProfilesHelpers;
-
 import org.junit.Test;
 
-import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
+import io.fabric8.profiles.Profiles;
+import io.fabric8.profiles.ProfilesHelpers;
 
 /**
  * Test Karaf reifier.
  */
-public class KarafReifierTest {
+public class WildFlyReifierTest {
 
     @Test
     public void testReify() throws Exception {
 
-        Path target = PROJECT_BASE_DIR.resolve("target/test-data/karafA");
+        Path target = PROJECT_BASE_DIR.resolve("target/test-data/wildflyA");
         ProfilesHelpers.deleteDirectory(target);
         Files.createDirectories(target);
 
-        Path repository = PROJECT_BASE_DIR.resolve("src/test/repos/karafA/profiles");
-        final Path materialized = PROJECT_BASE_DIR.resolve("target/test-data/karafA-materialized");
+        Path repository = PROJECT_BASE_DIR.resolve("src/test/repos/wildflyA/profiles");
+        final Path materialized = PROJECT_BASE_DIR.resolve("target/test-data/wildflyA-materialized");
         ProfilesHelpers.deleteDirectory(materialized);
         Files.createDirectories(materialized);
 
-        final Path containerConfig = PROJECT_BASE_DIR.resolve("src/test/repos/karafA/configs/containers/root.cfg");
-        String[] profileNames = ProfilesHelpers.readPropertiesFile(containerConfig).getProperty("profiles").replaceAll(" ?fabric-ensemble-\\S+", "").split(" ");
+        final Path containerConfig = PROJECT_BASE_DIR.resolve("src/test/repos/wildflyA/configs/containers/root.cfg");
+        String[] profileNames = ProfilesHelpers.readPropertiesFile(containerConfig).getProperty("profiles").split(" ");
         new Profiles(repository).materialize(materialized, profileNames);
 
         final Properties containerProperties = new Properties();
-        containerProperties.put("groupId", "io.fabric8.quickstarts");
-        containerProperties.put("artifactId", "root");
+        containerProperties.put("groupId", "io.fabric8.profiles.test");
+        containerProperties.put("artifactId", "wildfly-swarm-test");
         containerProperties.put("version", "1.0-SNAPSHOT");
-        containerProperties.put("name", "root");
-        containerProperties.put("description", "Karaf root container");
+        containerProperties.put("name", "WildFly Swarm Profile Test");
+        containerProperties.put("description", "WildFly Swarm Camel Container");
 
-        final KarafProjectReifier reifier = new KarafProjectReifier(null);
+        WildFlyProjectReifier reifier = new WildFlyProjectReifier(null);
         reifier.reify(target, containerProperties, materialized);
     }
 }

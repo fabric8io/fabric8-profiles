@@ -17,25 +17,28 @@ package io.fabric8.maven.profiles;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import io.fabric8.profiles.ProfilesHelpers;
-import io.fabric8.profiles.PluginTestHelpers;
+import java.util.Collections;
 
 import org.codehaus.plexus.PlexusTestCase;
 import org.junit.Test;
 
+import io.fabric8.profiles.PluginTestHelpers;
+import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.containers.wildfly.WildFlyProjectReifier;
+
 /**
  * Test container generation using Mojo.
  */
-public class ContainersGeneratorMojoTest extends PlexusTestCase {
+public class WildFlyContainerGeneratorMojoTest extends PlexusTestCase {
 
     @Test
     public void testExecute() throws Exception {
-        // set mojo parameters
-        ContainersGeneratorMojo generator = new ContainersGeneratorMojo();
 
-        generator.sourceDirectory = PluginTestHelpers.PROJECT_BASE_DIR.resolve("target/it/it-repo").toFile();
-        final Path target = PluginTestHelpers.PROJECT_BASE_DIR.resolve("target/generated-containers");
+    	ContainersGeneratorMojo generator = new ContainersGeneratorMojo();
+        generator.reifierMap = Collections.singletonMap(WildFlyProjectReifier.CONTAINER_TYPE, WildFlyProjectReifier.class.getName());
+
+        generator.sourceDirectory = PluginTestHelpers.PROJECT_BASE_DIR.resolve("target/it/repos/wildflyA").toFile();
+        Path target = PluginTestHelpers.PROJECT_BASE_DIR.resolve("target/container/wildflyA");
         ProfilesHelpers.deleteDirectory(target);
         Files.createDirectories(target);
 
