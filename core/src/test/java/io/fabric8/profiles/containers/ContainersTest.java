@@ -37,12 +37,12 @@ public class ContainersTest {
     @Test
     public void testReify() throws Exception {
         // temp karaf project output dir
-        Path target = PROJECT_BASE_DIR.resolve("target/test-data/karaf1");
+        Path target = PROJECT_BASE_DIR.resolve("target/test-data/karafA");
         deleteDirectory(target);
         Files.createDirectories(target);
 
         // temp profile git repo
-        final Path repository = PROJECT_BASE_DIR.resolve("target/test-data/it-repo");
+        final Path repository = PROJECT_BASE_DIR.resolve("target/test-data/repos/karafA");
         final Path profilesRoot = repository.resolve("profiles");
         final Path configsRoot = repository.resolve("configs");
         deleteDirectory(repository);
@@ -50,7 +50,7 @@ public class ContainersTest {
         Files.createDirectories(configsRoot);
 
         // copy integration test repository
-        ProfilesHelpers.copyDirectory(PROJECT_BASE_DIR.resolve("src/test/it-repo"), repository);
+        ProfilesHelpers.copyDirectory(PROJECT_BASE_DIR.resolve("src/test/repos/karafA"), repository);
 
         final Properties karafDefaults = new Properties();
         karafDefaults.put("groupId", "io.fabric8.karaf-swarm");

@@ -13,55 +13,52 @@
  *  implied.  See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-package io.fabric8.profiles.containers.karaf;
+package io.fabric8.profiles.containers.wildfly;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import io.fabric8.profiles.containers.VelocityBasedReifier;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 
-import static io.fabric8.profiles.ProfilesHelpers.readPropertiesFile;
+import io.fabric8.profiles.containers.VelocityBasedReifier;
 
 /**
  * Reify Karaf container from Profiles
  */
-public class KarafProjectReifier extends VelocityBasedReifier {
+public class WildFlyProjectReifier extends VelocityBasedReifier {
 
-    private static final String KARAF_POM_VM = "/containers/karaf/pom.vm";
+    private static final String KARAF_POM_VM = "/containers/wildfly/pom.vm";
 
-    private static final String REPOSITORY_PREFIX = "repository.";
-    private static final String FEATURE_PREFIX = "feature.";
-    private static final String BUNDLE_PREFIX = "bundle.";
-    private static final String OVERRIDE_PREFIX = "override.";
     private static final String CONFIG_PREFIX = "config.";
     private static final String SYSTEM_PREFIX = "system.";
-    private static final String LIB_PREFIX = "lib.";
 
-    private static final String AGENT_PROPERTIES = "io.fabric8.agent.properties";
+    public static final String CONTAINER_TYPE = "wildfly";
 
-    public static final String CONTAINER_TYPE = "karaf";
-
-    public KarafProjectReifier(Properties properties) {
+    private static final String SWARM_FRACTIONS_PROPERTIES = "swarm.fractions.properties";
+    
+    public WildFlyProjectReifier(Properties properties) {
         super(properties);
     }
 
     public void reify(Path target, Properties config, Path profilesDir) throws IOException {
         // reify maven project using template
-        final Properties containerProperties = new Properties();
+        Properties containerProperties = new Properties();
         containerProperties.putAll(defaultProperties);
         containerProperties.putAll(config);
         reifyProject(target, profilesDir, containerProperties);
@@ -118,9 +115,6 @@ public class KarafProjectReifier extends VelocityBasedReifier {
 
                     Path targetPath = assemblyPath.resolve(profilesDir.relativize(file));
                     String fileName = file.getFileName().toString();
-                    if (AGENT_PROPERTIES.equals(fileName)) {
-                        return FileVisitResult.CONTINUE;
-                    }
 
                     // Skip over profile file that we know are not karaf config.
                     if (
@@ -186,39 +180,54 @@ public class KarafProjectReifier extends VelocityBasedReifier {
     }
 
     private void loadProperties(VelocityContext context, Path profilesDir) throws IOException {
-        Path agentProperties = profilesDir.resolve(AGENT_PROPERTIES);
-        if (Files.exists(agentProperties)) {
-            Properties props = readPropertiesFile(agentProperties);
 
-            // read repositories
-            context.put("repositories", getPrefixedProperty(props, REPOSITORY_PREFIX));
+    	Properties props = new Properties();
 
-            // read features
-            context.put("features", getPrefixedProperty(props, FEATURE_PREFIX));
+        // get config.properties
+        Map<String, String> configMap = new HashMap<>();
+        getPrefixedProperty(props, CONFIG_PREFIX, configMap);
+        context.put("configProperties", configMap.entrySet());
 
-            // read bundles
-            context.put("bundles", getPrefixedProperty(props, BUNDLE_PREFIX));
-
-            // read bundle overrides
-            context.put("blacklistedBundles", getPrefixedProperty(props, OVERRIDE_PREFIX));
-
-            // get config.properties
-            Map<String, String> configMap = new HashMap<>();
-            getPrefixedProperty(props, CONFIG_PREFIX, configMap);
-            context.put("configProperties", configMap.entrySet());
-
-            // get system.properties
-            Map<String, String> systemMap = new HashMap<>();
-            getPrefixedProperty(props, SYSTEM_PREFIX, systemMap);
-            context.put("systemProperties", systemMap.entrySet());
-
-            // get libraries
-            context.put("libraries", getPrefixedProperty(props, LIB_PREFIX));
-
-            // TODO add support for lib/ext (ext.xxx), lib/endorsed (endorsed.xxx) in karaf maven plugin
-
-        } else {
-            throw new IOException("Missing file " + agentProperties);
+        // get system.properties
+        Map<String, String> systemMap = new HashMap<>();
+        getPrefixedProperty(props, SYSTEM_PREFIX, systemMap);
+        context.put("systemProperties", systemMap.entrySet());
+        
+        // add profile fractions
+        File propsFile = profilesDir.resolve(SWARM_FRACTIONS_PROPERTIES).toFile();
+        if (propsFile.exists()) {
+        	Properties fprops = new Properties();
+        	try (Reader fr = new FileReader(propsFile)) {
+            	fprops.load(fr);
+        	}
+            List<Fraction> fractions = new ArrayList<>();
+        	String[] specs = fprops.getProperty("fractions").split(",");
+        	for (String spec : specs) {
+        		spec = spec.trim();
+        		int index = spec.indexOf(':');
+        		String groupId = spec.substring(0, index);
+        		String artifactId = spec.substring(index + 1);
+                fractions.add(new Fraction(groupId, artifactId));
+        	}
+            context.put("fractions", fractions);
         }
     }
+
+	public class Fraction {
+		public final String groupId;
+		public final String artifactId;
+	
+		Fraction(String groupId, String artifactId) {
+			this.groupId = groupId;
+			this.artifactId = artifactId;
+		}
+
+		public String getGroupId() {
+			return groupId;
+		}
+
+		public String getArtifactId() {
+			return artifactId;
+		}
+	}
 }

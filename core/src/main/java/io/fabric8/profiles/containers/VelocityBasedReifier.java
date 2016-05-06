@@ -15,7 +15,10 @@
  */
 package io.fabric8.profiles.containers;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -46,4 +49,26 @@ public abstract class VelocityBasedReifier extends ProjectReifier {
         engine.init();
     }
 
+	protected Set<String> getPrefixedProperty(Properties props, String featurePrefix) {
+	    return getPrefixedProperty(props, featurePrefix, null);
+	}
+
+	protected Set<String> getPrefixedProperty(Properties props, String prefix, Map<String, String> idMap) {
+	
+	    final Set<String> values = new HashSet<String>();
+	    for (Map.Entry<Object, Object> entry : props.entrySet()) {
+	
+	        final String key = entry.getKey().toString();
+	        if (key.startsWith(prefix)) {
+	            final String value = entry.getValue().toString();
+	            values.add(value);
+	
+	            if (idMap != null) {
+	                idMap.put(key.substring(prefix.length()), value);
+	            }
+	        }
+	    }
+	
+	    return values;
+	}
 }
