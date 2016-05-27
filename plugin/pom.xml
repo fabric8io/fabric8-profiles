@@ -89,7 +89,7 @@
     <!-- copy test repo data for unit and integration tests -->
     <testResources>
       <testResource>
-        <directory>../core/src/test/repos</directory>
+        <directory>../core/src/test/resources/repos</directory>
         <targetPath>${project.build.directory}/it/repos</targetPath>
       </testResource>
       <testResource>

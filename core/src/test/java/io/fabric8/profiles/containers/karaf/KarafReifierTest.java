@@ -32,6 +32,8 @@ import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
  */
 public class KarafReifierTest {
 
+    static final Path REPOSITORIES_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos");
+    
     @Test
     public void testReify() throws Exception {
 
@@ -39,12 +41,12 @@ public class KarafReifierTest {
         ProfilesHelpers.deleteDirectory(target);
         Files.createDirectories(target);
 
-        Path repository = PROJECT_BASE_DIR.resolve("src/test/repos/karafA/profiles");
+        Path repository = REPOSITORIES_BASE_DIR.resolve("karafA/profiles");
         final Path materialized = PROJECT_BASE_DIR.resolve("target/test-data/karafA-materialized");
         ProfilesHelpers.deleteDirectory(materialized);
         Files.createDirectories(materialized);
 
-        final Path containerConfig = PROJECT_BASE_DIR.resolve("src/test/repos/karafA/configs/containers/root.cfg");
+        final Path containerConfig = REPOSITORIES_BASE_DIR.resolve("karafA/configs/containers/root.cfg");
         String[] profileNames = ProfilesHelpers.readPropertiesFile(containerConfig).getProperty("profiles").replaceAll(" ?fabric-ensemble-\\S+", "").split(" ");
         new Profiles(repository).materialize(materialized, profileNames);
 

@@ -39,7 +39,7 @@ public class ProfilesTest {
         deleteDirectory(target);
         Files.createDirectories(target);
 
-        Path repository = PROJECT_BASE_DIR.resolve("src/test/profiles");
+        Path repository = PROJECT_BASE_DIR.resolve("src/test/resources/profiles");
         new Profiles(repository).materialize(target, "d");
 
         Assert.assertEquals("d", readTextFile(target.resolve("test.txt")));

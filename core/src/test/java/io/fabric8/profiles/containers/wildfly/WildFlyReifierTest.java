@@ -31,6 +31,8 @@ import io.fabric8.profiles.ProfilesHelpers;
  */
 public class WildFlyReifierTest {
 
+    static final Path REPOSITORIES_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos");
+    
     @Test
     public void testReify() throws Exception {
 
@@ -38,12 +40,12 @@ public class WildFlyReifierTest {
         ProfilesHelpers.deleteDirectory(target);
         Files.createDirectories(target);
 
-        Path repository = PROJECT_BASE_DIR.resolve("src/test/repos/wildflyA/profiles");
+        Path repository = REPOSITORIES_BASE_DIR.resolve("wildflyA/profiles");
         final Path materialized = PROJECT_BASE_DIR.resolve("target/test-data/wildflyA-materialized");
         ProfilesHelpers.deleteDirectory(materialized);
         Files.createDirectories(materialized);
 
-        final Path containerConfig = PROJECT_BASE_DIR.resolve("src/test/repos/wildflyA/configs/containers/root.cfg");
+        final Path containerConfig = REPOSITORIES_BASE_DIR.resolve("wildflyA/configs/containers/root.cfg");
         String[] profileNames = ProfilesHelpers.readPropertiesFile(containerConfig).getProperty("profiles").split(" ");
         new Profiles(repository).materialize(materialized, profileNames);
 

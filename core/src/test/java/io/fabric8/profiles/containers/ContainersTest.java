@@ -34,6 +34,8 @@ import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
  */
 public class ContainersTest {
 
+    static final Path REPOSITORIES_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos");
+    
     @Test
     public void testReify() throws Exception {
         // temp karaf project output dir
@@ -50,7 +52,7 @@ public class ContainersTest {
         Files.createDirectories(configsRoot);
 
         // copy integration test repository
-        ProfilesHelpers.copyDirectory(PROJECT_BASE_DIR.resolve("src/test/repos/karafA"), repository);
+        ProfilesHelpers.copyDirectory(REPOSITORIES_BASE_DIR.resolve("karafA"), repository);
 
         final Properties karafDefaults = new Properties();
         karafDefaults.put("groupId", "io.fabric8.karaf-swarm");
