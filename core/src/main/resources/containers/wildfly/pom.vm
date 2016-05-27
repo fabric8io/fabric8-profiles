@@ -50,6 +50,7 @@
           <jvmArguments>
             <jvmArgument>-Xmx128m</jvmArgument>
           </jvmArguments>
+          <mainClass>$mainClass</mainClass>
         </configuration>
         <executions>
           <execution>

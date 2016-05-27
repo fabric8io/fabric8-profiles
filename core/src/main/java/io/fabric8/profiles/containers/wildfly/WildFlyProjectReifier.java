@@ -20,18 +20,20 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -39,184 +41,178 @@ import org.apache.velocity.VelocityContext;
 import io.fabric8.profiles.containers.VelocityBasedReifier;
 
 /**
- * Reify Karaf container from Profiles
+ * Reify WildFly container from Profiles
  */
 public class WildFlyProjectReifier extends VelocityBasedReifier {
 
-    private static final String KARAF_POM_VM = "/containers/wildfly/pom.vm";
+	public static final String CONTAINER_TYPE = "wildfly";
+	public static final String DOMAIN_NAMESPACE = "urn:jboss:domain:4.0";
 
-    private static final String CONFIG_PREFIX = "config.";
-    private static final String SYSTEM_PREFIX = "system.";
+	private static final String CONTAINER_PATH = "/containers/wildfly";
+	private static final String POM_VM = CONTAINER_PATH + "/pom.vm";
+	private static final String MAIN_VM = CONTAINER_PATH + "/src/main/java/Main.java";
 
-    public static final String CONTAINER_TYPE = "wildfly";
+	private static final String FRACTION_PREFIX = "fraction.";
+	private static final String CONFIG_PREFIX = "config.";
+	private static final String SYSTEM_PREFIX = "system.";
 
-    private static final String SWARM_FRACTIONS_PROPERTIES = "swarm.fractions.properties";
-    
-    public WildFlyProjectReifier(Properties properties) {
-        super(properties);
-    }
+	private static final String SWARM_FRACTION_PROPERTIES = "fraction.properties";
 
-    public void reify(Path target, Properties config, Path profilesDir) throws IOException {
-        // reify maven project using template
-        Properties containerProperties = new Properties();
-        containerProperties.putAll(defaultProperties);
-        containerProperties.putAll(config);
-        reifyProject(target, profilesDir, containerProperties);
-    }
+	public WildFlyProjectReifier(Properties properties) {
+		super(properties);
+	}
 
-    private void reifyProject(Path target, final Path profilesDir, Properties properties) throws IOException {
-        final File pojoFile = new File(target.toFile(), "pom.xml");
-        BufferedWriter writer = null;
+	public void reify(Path target, Properties config, Path profilesDir) throws IOException {
+		// reify maven project using template
+		Properties containerProperties = new Properties();
+		containerProperties.putAll(defaultProperties);
+		containerProperties.putAll(config);
+		reifyProject(target, profilesDir, containerProperties);
+	}
 
-        try {
-            writer = new BufferedWriter(new FileWriter(pojoFile));
+	private void reifyProject(Path target, final Path profilesDir, Properties properties) throws IOException {
 
-            if( properties.getProperty("groupId")==null ) {
-                properties.setProperty("groupId", "container");
-            }
-            if( properties.getProperty("version")==null ) {
-                properties.setProperty("version", getProjectVersion());
-            }
-            if( properties.getProperty("description")==null ) {
-                properties.setProperty("description", "");
-            }
+		if (properties.getProperty("groupId") == null) {
+			properties.setProperty("groupId", "org.acme.fabric8.swarm");
+		}
+		if (properties.getProperty("version") == null) {
+			properties.setProperty("version", getProjectVersion());
+		}
+		if (properties.getProperty("description") == null) {
+			properties.setProperty("description", "");
+		}
 
-            VelocityContext context = new VelocityContext();
-            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-                context.put(entry.getKey().toString(), entry.getValue());
-            }
+		properties.setProperty("mainClass", properties.getProperty("groupId") + ".Main");
 
-            // read profile properties
-            loadProperties(context, profilesDir);
+		VelocityContext context = new VelocityContext();
+		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+			context.put(entry.getKey().toString(), entry.getValue());
+		}
 
-            log.debug(String.format("Writing %s...", pojoFile));
-            Template pojoTemplate = engine.getTemplate(KARAF_POM_VM);
-            pojoTemplate.merge(context, writer);
+		// read profile properties
+		loadProperties(context, profilesDir);
 
-            // close pojoFile
-            writer.close();
+		reifyPOM(target, context);
+		reifyMainJava(target, context, properties);
+		reifyStandaloneXML(target, context, profilesDir, properties);
+		reifyProjectStages(target, context, profilesDir, properties);
+	}
 
-            // add other resource files under src/main/resources/assembly
-            final Path assemblyPath = target.resolve("src/main/resources/assembly/etc");
-            log.debug(String.format("Writing resources to %s...", assemblyPath));
-            Files.createDirectories(assemblyPath,
-                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxrwx")));
-            Files.walkFileTree(profilesDir, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(final Path dir,
-                                                         final BasicFileAttributes attrs) throws IOException {
-                    Files.createDirectories(assemblyPath.resolve(profilesDir.relativize(dir)));
-                    return FileVisitResult.CONTINUE;
-                }
+	private void reifyPOM(Path target, VelocityContext context) throws IOException {
+		final File targetFile = new File(target.toFile(), "pom.xml");
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(targetFile))) {
+			log.debug(String.format("Writing %s...", targetFile));
+			Template pojoTemplate = engine.getTemplate(POM_VM);
+			pojoTemplate.merge(context, writer);
+		}
+	}
 
-                @Override
-                public FileVisitResult visitFile(final Path file,
-                                                 final BasicFileAttributes attrs) throws IOException {
+	private void reifyMainJava(Path target, VelocityContext context, Properties properties) throws IOException {
+		String groupId = properties.getProperty("groupId");
+		Path packagePath = target.resolve("src/main/java/" + groupId.replace('.', '/'));
+		File targetFile = new File(packagePath.toFile(), "Main.java");
+		targetFile.getParentFile().mkdirs();
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(targetFile))) {
+			log.debug(String.format("Writing %s...", targetFile));
+			Template pojoTemplate = engine.getTemplate(MAIN_VM);
+			pojoTemplate.merge(context, writer);
+		}
+	}
 
-                    Path targetPath = assemblyPath.resolve(profilesDir.relativize(file));
-                    String fileName = file.getFileName().toString();
+	private void reifyStandaloneXML(Path target, VelocityContext context, Path profilesDir, Properties properties) throws IOException {
+		String groupId = properties.getProperty("groupId");
+		Path packagePath = target.resolve("src/main/resources/" + groupId.replace('.', '/'));
 
-                    // Skip over profile file that we know are not karaf config.
-                    if (
-                        fileName.equalsIgnoreCase("icon.svg") ||
-                            fileName.equalsIgnoreCase("readme.md") ||
-                            fileName.equalsIgnoreCase("summary.md") ||
-                            fileName.equalsIgnoreCase("Jenkinsfile") ||
-                            fileName.equalsIgnoreCase("welcome.dashboard") ||
-                            fileName.endsWith("#docker") ||
-                            fileName.endsWith("#openshift")
-                        ) {
-                        return FileVisitResult.CONTINUE;
-                    }
+		String targetFileName = "standalone.xml";
+		File targetFile = new File(packagePath.toFile(), targetFileName);
+		targetFile.getParentFile().mkdirs();
+		try (PrintWriter targetWriter = new PrintWriter(new FileWriter(targetFile))) {
+			log.debug(String.format("Writing %s...", targetFile));
+			StringWriter strwr = new StringWriter();
+			Files.walkFileTree(profilesDir, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+					if (path.getFileName().toString().endsWith("." + targetFileName)) {
+						try (FileReader fr = new FileReader(path.toFile())) {
+							int c;
+							while ((c = fr.read()) != -1) {
+								strwr.write(c);
+							}
+						}
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
+			targetWriter.println("<server xmlns=\"" + DOMAIN_NAMESPACE + "\">");
+			if (!engine.evaluate(context, targetWriter, targetFileName, strwr.toString())) 
+				throw new IllegalStateException("Cannot render: " + targetFileName);
+			targetWriter.println("</server>");
+		}
+	}
 
-                    String extension = extension(fileName);
-                    if ("properties".equals(extension)) {
+	private void reifyProjectStages(Path target, VelocityContext context, Path profilesDir, Properties properties) throws IOException {
+		String groupId = properties.getProperty("groupId");
+		Path packagePath = target.resolve("src/main/resources/" + groupId.replace('.', '/'));
 
-                        // Lets put auth related files in the auth dir to keep things neat.
-                        boolean isAuthFile = fileName.startsWith("jmx.acl.") || fileName.startsWith("org.apache.karaf.command.acl");
-                        if (isAuthFile && profilesDir.relativize(file).getParent() == null) {
-                            targetPath = assemblyPath.resolve("auth").resolve(profilesDir.relativize(file));
-                        }
+		String targetFileName = "project-stages.yml";
+		File targetFile = new File(packagePath.toFile(), targetFileName);
+		targetFile.getParentFile().mkdirs();
+		try (BufferedWriter targetWriter = new BufferedWriter(new FileWriter(targetFile))) {
+			log.debug(String.format("Writing %s...", targetFile));
+			StringWriter strwr = new StringWriter();
+			try (FileReader fr = new FileReader(profilesDir.resolve(targetFileName).toFile())) {
+				int c;
+				while ((c = fr.read()) != -1) {
+					strwr.write(c);
+				}
+			}
+			if (!engine.evaluate(context, targetWriter, targetFileName, strwr.toString())) 
+				throw new IllegalStateException("Cannot render: " + targetFileName);
+		}
+	}
 
-                        // Rename .properties files to .cfg files.
-                        String targetName = withoutExtension(fileName) + ".cfg";
-                        targetPath = targetPath.getParent().resolve(targetName);
-                    }
+	private String getProjectVersion() {
+		return "1.0-SNAPSHOT";
+	}
 
-                    Files.createDirectories(targetPath.getParent());
-                    Files.copy(file, targetPath);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+	private void loadProperties(VelocityContext context, Path profilesDir) throws IOException {
 
-            log.debug("Done!");
+		Properties props = new Properties();
 
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
-        }
-    }
+		// get config.properties
+		Map<String, String> configMap = new HashMap<>();
+		getPrefixedProperty(props, CONFIG_PREFIX, configMap);
+		context.put("configProperties", configMap.entrySet());
 
-    private String getProjectVersion() {
-        // TODO: perhpas use the git hash?
-        return "1.0-SNAPSHOT";
-    }
+		// get system.properties
+		Map<String, String> systemMap = new HashMap<>();
+		getPrefixedProperty(props, SYSTEM_PREFIX, systemMap);
+		context.put("systemProperties", systemMap.entrySet());
 
-    static private String extension(String fileName) {
-        int i = fileName.lastIndexOf('.');
-        if (i > 0) {
-            return fileName.substring(i + 1);
-        }
-        return null;
-    }
-
-    static private String withoutExtension(String fileName) {
-        int i = fileName.lastIndexOf('.');
-        if (i > 0) {
-            return fileName.substring(0, i);
-        }
-        return fileName;
-    }
-
-    private void loadProperties(VelocityContext context, Path profilesDir) throws IOException {
-
-    	Properties props = new Properties();
-
-        // get config.properties
-        Map<String, String> configMap = new HashMap<>();
-        getPrefixedProperty(props, CONFIG_PREFIX, configMap);
-        context.put("configProperties", configMap.entrySet());
-
-        // get system.properties
-        Map<String, String> systemMap = new HashMap<>();
-        getPrefixedProperty(props, SYSTEM_PREFIX, systemMap);
-        context.put("systemProperties", systemMap.entrySet());
-        
-        // add profile fractions
-        File propsFile = profilesDir.resolve(SWARM_FRACTIONS_PROPERTIES).toFile();
-        if (propsFile.exists()) {
-        	Properties fprops = new Properties();
-        	try (Reader fr = new FileReader(propsFile)) {
-            	fprops.load(fr);
-        	}
-            List<Fraction> fractions = new ArrayList<>();
-        	String[] specs = fprops.getProperty("fractions").split(",");
-        	for (String spec : specs) {
-        		spec = spec.trim();
-        		int index = spec.indexOf(':');
-        		String groupId = spec.substring(0, index);
-        		String artifactId = spec.substring(index + 1);
-                fractions.add(new Fraction(groupId, artifactId));
-        	}
-            context.put("fractions", fractions);
-        }
-    }
+		// add profile fractions
+		File propsFile = profilesDir.resolve(SWARM_FRACTION_PROPERTIES).toFile();
+		if (propsFile.exists()) {
+			Properties fprops = new Properties();
+			try (Reader fr = new FileReader(propsFile)) {
+				fprops.load(fr);
+			}
+			List<Fraction> fractions = new ArrayList<>();
+			Set<String> specs = getPrefixedProperty(fprops, FRACTION_PREFIX);
+			for (String spec : specs) {
+				spec = spec.trim();
+				int index = spec.indexOf(':');
+				String groupId = spec.substring(0, index);
+				String artifactId = spec.substring(index + 1);
+				fractions.add(new Fraction(groupId, artifactId));
+			}
+			context.put("fractions", fractions);
+		}
+	}
 
 	public class Fraction {
 		public final String groupId;
 		public final String artifactId;
-	
+
 		Fraction(String groupId, String artifactId) {
 			this.groupId = groupId;
 			this.artifactId = artifactId;

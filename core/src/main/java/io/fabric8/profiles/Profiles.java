@@ -117,7 +117,6 @@ public class Profiles {
             // replace ${runtime. with ${karaf.
             line = RUNTIME_PATTERN.matcher(line).replaceAll(Matcher.quoteReplacement("${karaf."));
 
-            int origLen = line.length();
             StringBuffer updatedLine = new StringBuffer(line.length());
 
             // resolve ${profile:PID/property} URLs
