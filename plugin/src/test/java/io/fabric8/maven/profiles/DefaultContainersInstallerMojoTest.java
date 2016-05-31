@@ -44,7 +44,7 @@ public class DefaultContainersInstallerMojoTest extends PlexusTestCase {
         Files.createDirectories(target);
 
         // create test git repo
-        Path repoSource = PROJECT_BASE_DIR.resolve("target/it/it-repo");
+        Path repoSource = PROJECT_BASE_DIR.resolve("target/it/repos/karafA");
         Path sourceDir = PROJECT_BASE_DIR.resolve("target/generated-repo");
         ProfilesHelpers.deleteDirectory(sourceDir);
         ProfilesHelpers.copyDirectory(repoSource, sourceDir);

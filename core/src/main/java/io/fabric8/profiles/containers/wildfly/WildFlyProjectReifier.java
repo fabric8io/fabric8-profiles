@@ -72,6 +72,9 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 
 	private void reifyProject(Path target, final Path profilesDir, Properties properties) throws IOException {
 
+		if (properties.getProperty("artifactId") == null) {
+			properties.setProperty("artifactId", "acme-swarm-test");
+		}
 		if (properties.getProperty("groupId") == null) {
 			properties.setProperty("groupId", "org.acme.fabric8.swarm");
 		}
