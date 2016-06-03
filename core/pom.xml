@@ -51,6 +51,10 @@
       <artifactId>org.eclipse.jgit</artifactId>
     </dependency>
     <dependency>
+        <groupId>org.jdom</groupId>
+        <artifactId>jdom</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

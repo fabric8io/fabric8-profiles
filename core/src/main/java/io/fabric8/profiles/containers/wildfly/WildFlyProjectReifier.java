@@ -23,11 +23,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +33,9 @@ import java.util.Set;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
+import org.jdom.Element;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 
 import io.fabric8.profiles.containers.VelocityBasedReifier;
 
@@ -98,7 +97,6 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 		reifyPOM(target, context);
 		reifyMainJava(target, context, properties);
 		reifyStandaloneXML(target, context, profilesDir, properties);
-		reifyProjectStages(target, context, profilesDir, properties);
 	}
 
 	private void reifyPOM(Path target, VelocityContext context) throws IOException {
@@ -131,47 +129,32 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 		targetFile.getParentFile().mkdirs();
 		try (PrintWriter targetWriter = new PrintWriter(new FileWriter(targetFile))) {
 			log.debug(String.format("Writing %s...", targetFile));
+			Path stagesPath = profilesDir.resolve("project-stages.yml");
+	        YamlTransformer transformer = createYamlTransformer().transform(stagesPath);
+			XMLOutputter outputer = new XMLOutputter(Format.getPrettyFormat());
 			StringWriter strwr = new StringWriter();
-			Files.walkFileTree(profilesDir, new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-					if (path.getFileName().toString().endsWith("." + targetFileName)) {
-						try (FileReader fr = new FileReader(path.toFile())) {
-							int c;
-							while ((c = fr.read()) != -1) {
-								strwr.write(c);
-							}
-						}
-					}
-					return FileVisitResult.CONTINUE;
-				}
-			});
+	        for (String key : transformer) { 
+	        	if (transformer.getNamespace(key) != null) {
+			        Element element = transformer.getElement(key);
+			        if (key.equals("datasources")) {
+			        	element = new Element("datasources", element.getNamespace()).addContent(element);
+			        }
+			        element.setName("subsystem");
+					outputer.output(element, strwr);
+					new PrintWriter(strwr).println();
+	        	}
+	        }
 			targetWriter.println("<server xmlns=\"" + DOMAIN_NAMESPACE + "\">");
+			targetWriter.println("<profile>");
 			if (!engine.evaluate(context, targetWriter, targetFileName, strwr.toString())) 
 				throw new IllegalStateException("Cannot render: " + targetFileName);
+			targetWriter.println("</profile>");
 			targetWriter.println("</server>");
 		}
 	}
 
-	private void reifyProjectStages(Path target, VelocityContext context, Path profilesDir, Properties properties) throws IOException {
-		String groupId = properties.getProperty("groupId");
-		Path packagePath = target.resolve("src/main/resources/" + groupId.replace('.', '/'));
-
-		String targetFileName = "project-stages.yml";
-		File targetFile = new File(packagePath.toFile(), targetFileName);
-		targetFile.getParentFile().mkdirs();
-		try (BufferedWriter targetWriter = new BufferedWriter(new FileWriter(targetFile))) {
-			log.debug(String.format("Writing %s...", targetFile));
-			StringWriter strwr = new StringWriter();
-			try (FileReader fr = new FileReader(profilesDir.resolve(targetFileName).toFile())) {
-				int c;
-				while ((c = fr.read()) != -1) {
-					strwr.write(c);
-				}
-			}
-			if (!engine.evaluate(context, targetWriter, targetFileName, strwr.toString())) 
-				throw new IllegalStateException("Cannot render: " + targetFileName);
-		}
+	private YamlTransformer createYamlTransformer() {
+		return new YamlTransformer().namespace("datasources", "urn:jboss:domain:datasources:4.0");
 	}
 
 	private String getProjectVersion() {

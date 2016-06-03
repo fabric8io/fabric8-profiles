@@ -1,12 +1,17 @@
 project:
   stage: default
 datasources:
-  name: ExampleDS
-  module: com.h2database.h2
-  driver-class: org.h2.Driver
-  xa-datasource-class: org.h2.jdbcx.JdbcDataSource
-  connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE 
-  security:
-    username: sa 
-    password: sa 
-  
+  drivers:
+    driver:
+      name-attr: dsDriver
+      module-attr: com.h2database.h2
+      driver-class: org.h2.Driver
+      xa-datasource-class: org.h2.jdbcx.JdbcDataSource
+  datasource:
+    jndi-name-attr: java:jboss/datasources/ProfileDS
+    connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE 
+    pool-name-attr: ProfileDS
+    driver: dsDriver
+    security:
+      user-name: sa 
+      password: sa

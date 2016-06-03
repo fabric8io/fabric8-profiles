@@ -28,9 +28,9 @@ public class Main {
 	public static void main(String... args) throws Exception {
 		Container container = new Container();
 		URL xmlConfig = Main.class.getResource("standalone.xml");
-		URL stageConfig = Main.class.getResource("project-stages.yml");
-		container.withXmlConfig(xmlConfig);
-		container.withStageConfig(stageConfig);
+		if (xmlConfig != null) {
+			container.withXmlConfig(xmlConfig);
+		}
 		container.start().deploy();
 	}
 }

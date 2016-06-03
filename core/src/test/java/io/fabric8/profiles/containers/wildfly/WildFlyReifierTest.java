@@ -26,9 +26,6 @@ import org.junit.Test;
 import io.fabric8.profiles.Profiles;
 import io.fabric8.profiles.ProfilesHelpers;
 
-/**
- * Test Karaf reifier.
- */
 public class WildFlyReifierTest {
 
     static final Path REPOSITORIES_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos");
