@@ -34,17 +34,13 @@ public class YamlTransformerTest {
     static final Path REPOSITORY_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos/wildflyA/profiles");
     
     @Test
-    public void testReify() throws Exception {
+    public void testSimpleProfile() throws Exception {
 
         Path filePath = REPOSITORY_BASE_DIR.resolve("datasource/simple.profile/project-stages.yml");
         
         Properties props = new Properties();
         props.put("namespace.datasources", "urn:jboss:domain:datasources:4.0");
         YamlTransformer transformer = new YamlTransformer(props).transform(filePath);
-        
-		Assert.assertEquals("ProfileDS", transformer.getValue("datasources.datasource.pool-name-attr"));
-		Assert.assertEquals("sa", transformer.getValue("datasources.datasource.security.user-name"));
-		Assert.assertTrue(transformer.getValue("datasources.datasource.security") instanceof Map);
 		
 		Element el = transformer.getElement("datasources");
 		StringWriter sw = new StringWriter();
@@ -52,5 +48,35 @@ public class YamlTransformerTest {
 		// System.out.println(sw);
 		Assert.assertTrue(sw.toString().contains("pool-name=\"ProfileDS\""));
 		Assert.assertTrue(sw.toString().contains("<user-name>sa</user-name>"));
+        
+		Assert.assertEquals("ProfileDS", transformer.getValue("datasources.datasource.pool-name-attr"));
+		Assert.assertNull(transformer.getValue("datasources.datasource.pool-name-xxx-attr"));
+		Assert.assertNull(transformer.getValue("datasources.xxx.pool-name-attr"));
+		Assert.assertNull(transformer.getValue("xxx.datasource.pool-name-attr"));
+		
+		Assert.assertEquals("sa", transformer.getValue("datasources.datasource.security.user-name"));
+		Assert.assertTrue(transformer.getValue("datasources.datasource.security") instanceof Map);
+    }
+    
+    @Test
+    public void testMultipleProfile() throws Exception {
+
+        Path filePath = REPOSITORY_BASE_DIR.resolve("datasource/multiple.profile/project-stages.yml");
+        
+        Properties props = new Properties();
+        props.put("namespace.datasources", "urn:jboss:domain:datasources:4.0");
+        YamlTransformer transformer = new YamlTransformer(props).transform(filePath);
+		
+		Element el = transformer.getElement("datasources");
+		StringWriter sw = new StringWriter();
+		new XMLOutputter(Format.getPrettyFormat()).output(el, sw);
+		//System.out.println(sw);
+		Assert.assertTrue(sw.toString().contains("pool-name=\"ProfileOneDS\""));
+		Assert.assertTrue(sw.toString().contains("pool-name=\"ProfileTwoDS\""));
+		Assert.assertTrue(sw.toString().contains("pool-name=\"ProfileThreeDS\""));
+        
+		Assert.assertEquals("ProfileOneDS", transformer.getValue("datasources.datasource#0.pool-name-attr"));
+		Assert.assertEquals("ProfileTwoDS", transformer.getValue("datasources.datasource#1.pool-name-attr"));
+		Assert.assertEquals("ProfileThreeDS", transformer.getValue("datasources.datasource#2.pool-name-attr"));
     }
 }

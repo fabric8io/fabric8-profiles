@@ -1,0 +1,28 @@
+project:
+  stage: default
+datasources:
+  datasource#0:
+    jndi-name-attr: java:jboss/datasources/ProfileOneDS
+    connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE 
+    pool-name-attr: ProfileOneDS
+    driver: dsDriver
+    security:
+      user-name: sa 
+      password: sa
+  datasource#1:
+    jndi-name-attr: java:jboss/datasources/ProfileTwoDS
+    connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE 
+    pool-name-attr: ProfileTwoDS
+    driver: dsDriver
+    security:
+      user-name: sa 
+      password: sa
+  datasource#2:
+    jndi-name-attr: java:jboss/datasources/ProfileThreeDS
+    connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE 
+    pool-name-attr: ProfileThreeDS
+    driver: dsDriver
+    security:
+      user-name: sa 
+      password: sa
+      
