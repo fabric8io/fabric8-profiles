@@ -116,24 +116,37 @@ public class YamlTransformer implements Iterable<String> {
 		IllegalArgumentAssertion.assertNotNull(value, "value");
 		Namespace namespace = element.getNamespace();
 		if (key.endsWith("-attr")) {
-			int index = key.lastIndexOf("-attr");
-			String name = key.substring(key.lastIndexOf('.') + 1, index);
-			element.setAttribute(name, value.toString());
+			element.setAttribute(attributeName(key), value.toString());
 		} else if (value instanceof Map) {
 			Map<String, ?> map = (Map<String, ?>) value;
-			String name = key.substring(key.lastIndexOf('.') + 1);
-			Element child = new Element(name, namespace);
+			Element child = new Element(elementName(key), namespace);
 			for (String subkey : map.keySet()) {
 				addChildElement(child, key + "." + subkey, map.get(subkey));
 			}
 			element.addContent(child);
 		} else {
-			element.getNamespace();
-			String name = key.substring(key.lastIndexOf('.') + 1);
-			Element child = new Element(name, namespace);
+			Element child = new Element(elementName(key), namespace);
 			child.setText(value.toString());
 			element.addContent(child);
 		}
+	}
+
+	private String attributeName(String key) {
+		int dotIndex = key.lastIndexOf('.');
+		key = key.substring(dotIndex + 1);
+		return key.substring(0, key.lastIndexOf("-attr"));
+	}
+
+	private String elementName(String key) {
+		int hashIndex = key.lastIndexOf('#');
+		try {
+			Integer.parseInt(key.substring(hashIndex + 1));
+			key = key.substring(0, hashIndex);
+		} catch (NumberFormatException ex) {
+			// ignore
+		}
+		int dotIndex = key.lastIndexOf('.');
+		return key.substring(dotIndex + 1);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -143,11 +156,13 @@ public class YamlTransformer implements Iterable<String> {
 		int dotindex = key.indexOf('.');
 		if (dotindex > 0) {
 			Object value = map.get(key.substring(0, dotindex));
-			if (value instanceof String) {
-				return value;
-			} else {
+			if (value == null) {
+				return null;
+			} else if (value instanceof Map) {
 				String subkey = key.substring(dotindex + 1);
 				return getValueInternal(subkey, (Map<String, ?>) value);
+			} else {
+				return value.toString();
 			}
 		}
 		return map.get(key);
