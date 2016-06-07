@@ -21,9 +21,11 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -38,18 +40,17 @@ public class YamlTransformer implements Iterable<String> {
 	private final Map<String, Namespace> namespaces = new HashMap<>();
 	private Map<String, ?> result;
 	
-	public YamlTransformer namespaces(Map<String, String> map) {
-		for (String key : map.keySet()) {
-			namespace(key, map.get(key));
+	public YamlTransformer(Properties properties) {
+		Enumeration<?> names = properties.propertyNames();
+		while (names.hasMoreElements()) {
+			String key = (String) names.nextElement();
+			if (key.toString().startsWith("namespace.")) {
+				String value = properties.getProperty(key);
+				namespaces.put(key.substring(10), Namespace.getNamespace(value));
+			}
 		}
-		return this;
 	}
-	
-	public YamlTransformer namespace(String key, String nsuri) {
-		namespaces.put(key, Namespace.getNamespace(nsuri));
-		return this;
-	}
-	
+
 	public Namespace getNamespace(String key) {
 		return namespaces.get(key);
 	}

@@ -17,6 +17,7 @@ package io.fabric8.profiles.containers.wildfly;
 
 import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
 
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -28,32 +29,38 @@ import io.fabric8.profiles.ProfilesHelpers;
 
 public class WildFlyReifierTest {
 
-    static final Path REPOSITORIES_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos");
-    
-    @Test
-    public void testReify() throws Exception {
+	static final Path REPOSITORY_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos/wildflyA");
 
-        Path target = PROJECT_BASE_DIR.resolve("target/test-data/wildflyA");
-        ProfilesHelpers.deleteDirectory(target);
-        Files.createDirectories(target);
+	@Test
+	public void testReify() throws Exception {
 
-        Path repository = REPOSITORIES_BASE_DIR.resolve("wildflyA/profiles");
-        final Path materialized = PROJECT_BASE_DIR.resolve("target/test-data/wildflyA-materialized");
-        ProfilesHelpers.deleteDirectory(materialized);
-        Files.createDirectories(materialized);
+		Path target = PROJECT_BASE_DIR.resolve("target/test-data/wildflyA");
+		ProfilesHelpers.deleteDirectory(target);
+		Files.createDirectories(target);
 
-        final Path containerConfig = REPOSITORIES_BASE_DIR.resolve("wildflyA/configs/containers/root.cfg");
-        String[] profileNames = ProfilesHelpers.readPropertiesFile(containerConfig).getProperty("profiles").split(" ");
-        new Profiles(repository).materialize(materialized, profileNames);
+		Path materialized = PROJECT_BASE_DIR.resolve("target/test-data/wildflyA-materialized");
+		ProfilesHelpers.deleteDirectory(materialized);
+		Files.createDirectories(materialized);
 
-        final Properties containerProperties = new Properties();
-        containerProperties.put("groupId", "io.fabric8.profiles.test");
-        containerProperties.put("artifactId", "wildfly-swarm-test");
-        containerProperties.put("version", "1.0-SNAPSHOT");
-        containerProperties.put("name", "WildFly Swarm Profile Test");
-        containerProperties.put("description", "WildFly Swarm Camel Container");
+		Path config = REPOSITORY_BASE_DIR.resolve("configs/containers/root.cfg");
+		String[] profileNames = ProfilesHelpers.readPropertiesFile(config).getProperty("profiles").split(" ");
+		new Profiles(REPOSITORY_BASE_DIR.resolve("profiles")).materialize(materialized, profileNames);
 
-        WildFlyProjectReifier reifier = new WildFlyProjectReifier(null);
-        reifier.reify(target, containerProperties, materialized);
-    }
+		WildFlyProjectReifier reifier;
+		Path defaultPath = materialized.resolve("default.properties");
+		try (FileInputStream input = new FileInputStream(defaultPath.toFile())) {
+			Properties properties = new Properties();
+			properties.load(input);
+			reifier = new WildFlyProjectReifier(properties);
+		}
+
+		Properties properties = new Properties();
+		properties.put("groupId", "io.fabric8.profiles.test");
+		properties.put("artifactId", "wildfly-swarm-test");
+		properties.put("version", "1.0-SNAPSHOT");
+		properties.put("name", "WildFly Swarm Profile Test");
+		properties.put("description", "WildFly Swarm Camel Container");
+
+		reifier.reify(target, properties, materialized);
+	}
 }

@@ -20,6 +20,7 @@ import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Properties;
 
 import org.jdom.Element;
 import org.jdom.output.Format;
@@ -30,15 +31,16 @@ import org.junit.Test;
 
 public class YamlTransformerTest {
 
-    static final Path REPOSITORIES_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos");
+    static final Path REPOSITORY_BASE_DIR = PROJECT_BASE_DIR.resolve("src/test/resources/repos/wildflyA/profiles");
     
     @Test
     public void testReify() throws Exception {
 
-        Path filePath = REPOSITORIES_BASE_DIR.resolve("wildflyA/profiles/datasources.profile/project-stages.yml");
+        Path filePath = REPOSITORY_BASE_DIR.resolve("datasource/simple.profile/project-stages.yml");
         
-        YamlTransformer transformer = new YamlTransformer().transform(filePath);
-        transformer.namespace("datasources", "urn:jboss:domain:datasources:4.0");
+        Properties props = new Properties();
+        props.put("namespace.datasources", "urn:jboss:domain:datasources:4.0");
+        YamlTransformer transformer = new YamlTransformer(props).transform(filePath);
         
 		Assert.assertEquals("ProfileDS", transformer.getValue("datasources.datasource.pool-name-attr"));
 		Assert.assertEquals("sa", transformer.getValue("datasources.datasource.security.user-name"));
@@ -47,7 +49,7 @@ public class YamlTransformerTest {
 		Element el = transformer.getElement("datasources");
 		StringWriter sw = new StringWriter();
 		new XMLOutputter(Format.getPrettyFormat()).output(el, sw);
-		System.out.println(sw);
+		// System.out.println(sw);
 		Assert.assertTrue(sw.toString().contains("pool-name=\"ProfileDS\""));
 		Assert.assertTrue(sw.toString().contains("<user-name>sa</user-name>"));
     }

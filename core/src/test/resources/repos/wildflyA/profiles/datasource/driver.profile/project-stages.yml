@@ -1,0 +1,9 @@
+project:
+  stage: default
+datasources:
+  drivers:
+    driver:
+      name-attr: dsDriver
+      module-attr: com.h2database.h2
+      driver-class: org.h2.Driver
+      xa-datasource-class: org.h2.jdbcx.JdbcDataSource

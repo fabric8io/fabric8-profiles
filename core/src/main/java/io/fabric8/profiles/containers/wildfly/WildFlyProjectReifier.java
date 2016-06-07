@@ -127,10 +127,14 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 		String targetFileName = "standalone.xml";
 		File targetFile = new File(packagePath.toFile(), targetFileName);
 		targetFile.getParentFile().mkdirs();
+		
+		YamlTransformer transformer = new YamlTransformer(defaultProperties);
 		try (PrintWriter targetWriter = new PrintWriter(new FileWriter(targetFile))) {
+			
 			log.debug(String.format("Writing %s...", targetFile));
 			Path stagesPath = profilesDir.resolve("project-stages.yml");
-	        YamlTransformer transformer = createYamlTransformer().transform(stagesPath);
+	        transformer.transform(stagesPath);
+	        
 			XMLOutputter outputer = new XMLOutputter(Format.getPrettyFormat());
 			StringWriter strwr = new StringWriter();
 	        for (String key : transformer) { 
@@ -144,6 +148,7 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 					new PrintWriter(strwr).println();
 	        	}
 	        }
+	        
 			targetWriter.println("<server xmlns=\"" + DOMAIN_NAMESPACE + "\">");
 			targetWriter.println("<profile>");
 			if (!engine.evaluate(context, targetWriter, targetFileName, strwr.toString())) 
@@ -151,10 +156,6 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 			targetWriter.println("</profile>");
 			targetWriter.println("</server>");
 		}
-	}
-
-	private YamlTransformer createYamlTransformer() {
-		return new YamlTransformer().namespace("datasources", "urn:jboss:domain:datasources:4.0");
 	}
 
 	private String getProjectVersion() {
