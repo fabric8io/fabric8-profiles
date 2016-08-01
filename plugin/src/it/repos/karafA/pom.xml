@@ -18,12 +18,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>@project.groupId@</groupId>
-  <artifactId>profiles-sample-project</artifactId>
-  <version>@project.version@</version>
+  <groupId>${project.groupId}</groupId>
+  <artifactId>profiles-karaf-sample-project</artifactId>
+  <version>1.0-SNAPSHOT</version>
   <packaging>fabric8-profiles</packaging>
 
-  <description>Fabric8 Profiles sample project</description>
+  <description>Fabric8 Profiles sample project for Karaf containers</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,9 +32,9 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>@project.groupId@</groupId>
-        <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>${project.artifactId}</artifactId>
+        <version>${project.version}</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>
