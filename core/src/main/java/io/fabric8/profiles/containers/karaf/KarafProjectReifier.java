@@ -28,6 +28,10 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import io.fabric8.profiles.containers.VelocityBasedReifier;
 
@@ -54,6 +58,10 @@ public class KarafProjectReifier extends VelocityBasedReifier {
     private static final String AGENT_PROPERTIES = "io.fabric8.agent.properties";
 
     public static final String CONTAINER_TYPE = "karaf";
+
+    private static final Pattern PROFILE_URL_PATTERN = Pattern.compile("([^:]+):profile:([^:]+)");
+
+    private static final String KARAF_ASSEMBLY_PATH = "src/main/resources/assembly/etc";
 
     public KarafProjectReifier(Properties properties) {
         super(properties);
@@ -100,7 +108,7 @@ public class KarafProjectReifier extends VelocityBasedReifier {
             writer.close();
 
             // add other resource files under src/main/resources/assembly
-            final Path assemblyPath = target.resolve("src/main/resources/assembly/etc");
+            Path assemblyPath = target.resolve(KARAF_ASSEMBLY_PATH);
             log.debug(String.format("Writing resources to %s...", assemblyPath));
             Files.createDirectories(assemblyPath,
                 PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxrwx")));
@@ -197,7 +205,7 @@ public class KarafProjectReifier extends VelocityBasedReifier {
             context.put("features", getPrefixedProperty(props, FEATURE_PREFIX));
 
             // read bundles
-            context.put("bundles", getPrefixedProperty(props, BUNDLE_PREFIX));
+            context.put("bundles", relocateProfileUrls(getPrefixedProperty(props, BUNDLE_PREFIX)));
 
             // read bundle overrides
             context.put("blacklistedBundles", getPrefixedProperty(props, OVERRIDE_PREFIX));
@@ -220,5 +228,13 @@ public class KarafProjectReifier extends VelocityBasedReifier {
         } else {
             throw new IOException("Missing file " + agentProperties);
         }
+    }
+
+    private Set<String> relocateProfileUrls(Set<String> properties) {
+        return properties.stream()
+            .map(PROFILE_URL_PATTERN::matcher)
+            .filter(Matcher::matches)
+            .map(matcher -> matcher.group(1) + ":file:" + KARAF_ASSEMBLY_PATH + "/" + matcher.group(2))
+            .collect(Collectors.toSet());
     }
 }
