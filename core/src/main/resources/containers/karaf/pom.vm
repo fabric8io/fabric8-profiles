@@ -26,7 +26,9 @@
   <version>$version</version>
   <packaging>karaf-assembly</packaging>
   <name>$name</name>
+#if ( "$description" != "" )
   <description>$description</description>
+#end
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
