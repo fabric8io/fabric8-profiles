@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import io.fabric8.profiles.containers.Containers;
 import io.fabric8.profiles.containers.VelocityBasedReifier;
 
 import org.apache.velocity.Template;
@@ -82,13 +83,16 @@ public class KarafProjectReifier extends VelocityBasedReifier {
         try {
             writer = new BufferedWriter(new FileWriter(pojoFile));
 
-            if( properties.getProperty("groupId")==null ) {
+            if (properties.getProperty("artifactId") == null) {
+                properties.setProperty("artifactId", properties.getProperty(Containers.NAME_PROPERTY));
+            }
+            if (properties.getProperty("groupId") == null) {
                 properties.setProperty("groupId", "container");
             }
-            if( properties.getProperty("version")==null ) {
+            if (properties.getProperty("version") == null) {
                 properties.setProperty("version", getProjectVersion());
             }
-            if( properties.getProperty("description")==null ) {
+            if (properties.getProperty("description") == null) {
                 properties.setProperty("description", "");
             }
 
