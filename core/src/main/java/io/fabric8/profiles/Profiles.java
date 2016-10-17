@@ -109,7 +109,14 @@ public class Profiles {
 
     private void resolveURLsInFile(Path file, final Properties versionProperties) throws IOException {
 //        final List<String> lines = Files.readAllLines(file, UTF_8);
-        final List<String> lines = Files.readAllLines(file);
+        final List<String> lines;
+        try {
+            lines = Files.readAllLines(file);
+        } catch (IOException cause) {
+            // Skip exceptions that can be thrown for binary files
+            LOG.debug("Skipping URL resolution for file {}", file);
+            return;
+        }
         final List<String> updatedLines = new ArrayList<>();
         boolean updated = false;
         for (String line : lines) {
