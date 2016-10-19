@@ -111,7 +111,7 @@ public class GitRemoteProcessor extends ProjectProcessor {
                     .call();
             } catch (InvalidRemoteException e) {
                 if (e.getCause() instanceof NoRemoteRepositoryException) {
-                    final String address = "http://" + config.getProperty("gogsServiceHost", "gogs.vagrant.f8");
+                    final String address = "http://" + config.getProperty("gogsServiceHost", "gogs");
 
                     GitRepoClient client = new GitRepoClient(address, userName, password);
 
