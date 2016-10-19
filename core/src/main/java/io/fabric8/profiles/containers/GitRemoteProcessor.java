@@ -22,6 +22,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
 
+import io.fabric8.devops.ProjectConfig;
+import io.fabric8.devops.connector.DevOpsConnector;
 import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.repo.git.CreateRepositoryDTO;
 import io.fabric8.repo.git.GitRepoClient;
@@ -108,7 +110,6 @@ public class GitRemoteProcessor extends ProjectProcessor {
                     .setCredentialsProvider(credentialsProvider)
                     .call();
             } catch (InvalidRemoteException e) {
-                // TODO handle creating new remote repo in github, gogs, etc. using fabric8 devops connector
                 if (e.getCause() instanceof NoRemoteRepositoryException) {
                     final String address = "http://" + config.getProperty("gogsServiceHost", "gogs.vagrant.f8");
 
@@ -143,6 +144,25 @@ public class GitRemoteProcessor extends ProjectProcessor {
                         // ignore
                     }
 
+                    // Call the fabric8 devops connector to create the Git repository
+                    // and the Jenkins jobs along with other discoverable devops services
+                    DevOpsConnector connector = new DevOpsConnector();
+                    ProjectConfig projectConfig = new ProjectConfig();
+                    projectConfig.setUseLocalFlow(true);
+                    projectConfig.setBuildName(name);
+                    connector.setProjectConfig(projectConfig);
+                    connector.setGitRepoClient(client);
+                    connector.setBasedir(tempDirectory.toFile());
+                    connector.setUsername(userName);
+                    connector.setPassword(password);
+                    connector.setRepoName(name);
+                    connector.setProjectName(name);
+                    connector.setRegisterWebHooks(true);
+                    try {
+                        connector.execute();
+                    } catch (Exception cause) {
+                        throwException("Error creating Devops project", remoteUri, cause);
+                    }
                 } else {
                     throwException("Error cloning ", remoteUri, e);
                 }

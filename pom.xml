@@ -42,12 +42,12 @@
   </scm>
 
   <properties>
-    <version.fabric8>2.2.100</version.fabric8>
+    <version.fabric8>2.2.168</version.fabric8>
     <version.jackson2>2.7.0</version.jackson2>
     <version.jdom>1.1.3</version.jdom>
     <version.jgit>4.3.0.201604071810-r</version.jgit>
     <version.junit>4.12</version.junit>
-    <version.kubernetes.client>1.3.78</version.kubernetes.client>
+    <version.kubernetes.client>1.4.14</version.kubernetes.client>
     <version.slf4j>1.7.12</version.slf4j>
     <version.spring.boot>1.3.3.RELEASE</version.spring.boot>
     <version.spring.cloud>1.0.4.RELEASE</version.spring.cloud>
@@ -99,6 +99,11 @@
       <dependency>
         <groupId>io.fabric8</groupId>
         <artifactId>gitrepo-api</artifactId>
+        <version>${version.fabric8}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>fabric8-devops-connector</artifactId>
         <version>${version.fabric8}</version>
       </dependency>
 
