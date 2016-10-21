@@ -34,12 +34,19 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import io.fabric8.profiles.containers.Containers;
+import com.fasterxml.jackson.databind.JsonNode;
+import io.fabric8.profiles.Profiles;
+import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.config.ContainerConfigDTO;
+import io.fabric8.profiles.config.MavenConfigDTO;
+import io.fabric8.profiles.config.ProjectPropertiesDTO;
 import io.fabric8.profiles.containers.VelocityBasedReifier;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 
 import static io.fabric8.profiles.ProfilesHelpers.readPropertiesFile;
+import static io.fabric8.profiles.config.ConfigHelper.toValue;
 
 /**
  * Reify Karaf container from Profiles
@@ -56,49 +63,52 @@ public class KarafProjectReifier extends VelocityBasedReifier {
     private static final String SYSTEM_PREFIX = "system.";
     private static final String LIB_PREFIX = "lib.";
 
-    private static final String AGENT_PROPERTIES = "io.fabric8.agent.properties";
-
     public static final String CONTAINER_TYPE = "karaf";
 
     private static final Pattern PROFILE_URL_PATTERN = Pattern.compile("([^:]+):profile:([^:]+)");
 
     private static final String KARAF_ASSEMBLY_PATH = "src/main/resources/assembly/etc";
 
-    public KarafProjectReifier(Properties properties) {
-        super(properties);
+    public KarafProjectReifier(JsonNode defaultConfig) {
+        super(defaultConfig);
     }
 
-    public void reify(Path target, Properties config, Path profilesDir) throws IOException {
+    public void reify(Path target, JsonNode config, Path profilesDir) throws IOException {
         // reify maven project using template
-        final Properties containerProperties = new Properties();
-        containerProperties.putAll(defaultProperties);
-        containerProperties.putAll(config);
+        final JsonNode containerProperties = ProfilesHelpers.merge(config.deepCopy(), defaultProperties);
         reifyProject(target, profilesDir, containerProperties);
     }
 
-    private void reifyProject(Path target, final Path profilesDir, Properties properties) throws IOException {
+    private void reifyProject(Path target, final Path profilesDir, JsonNode config) throws IOException {
         final File pojoFile = new File(target.toFile(), "pom.xml");
         BufferedWriter writer = null;
 
         try {
             writer = new BufferedWriter(new FileWriter(pojoFile));
 
-            if (properties.getProperty("artifactId") == null) {
-                properties.setProperty("artifactId", properties.getProperty(Containers.NAME_PROPERTY));
+            final MavenConfigDTO mavenConfigDTO = toValue(config, MavenConfigDTO.class);
+            if (mavenConfigDTO.getArtifactId() == null) {
+                mavenConfigDTO.setArtifactId(Containers.NAME_PROPERTY);
             }
-            if (properties.getProperty("groupId") == null) {
-                properties.setProperty("groupId", "container");
+            if (mavenConfigDTO.getGroupId() == null) {
+                mavenConfigDTO.setGroupId("container");
             }
-            if (properties.getProperty("version") == null) {
-                properties.setProperty("version", getProjectVersion());
+            if (mavenConfigDTO.getVersion() == null) {
+                mavenConfigDTO.setVersion(getProjectVersion());
             }
-            if (properties.getProperty("description") == null) {
-                properties.setProperty("description", "");
+            if (mavenConfigDTO.getDescription() == null) {
+                mavenConfigDTO.setDescription("");
             }
 
-            VelocityContext context = new VelocityContext();
-            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-                context.put(entry.getKey().toString(), entry.getValue());
+            final VelocityContext context = new VelocityContext();
+            // add container and maven config
+            context.put("maven", mavenConfigDTO);
+            context.put("container", toValue(config, ContainerConfigDTO.class));
+
+            // add generic project properties
+            final ProjectPropertiesDTO projectPropertiesDTO = toValue(config, ProjectPropertiesDTO.class);
+            for (Map.Entry<String, Object> entry : projectPropertiesDTO.getProperties().entrySet()) {
+                context.put(entry.getKey(), entry.getValue());
             }
 
             // read profile properties
@@ -130,7 +140,7 @@ public class KarafProjectReifier extends VelocityBasedReifier {
 
                     Path targetPath = assemblyPath.resolve(profilesDir.relativize(file));
                     String fileName = file.getFileName().toString();
-                    if (AGENT_PROPERTIES.equals(fileName)) {
+                    if (Profiles.FABRIC8_AGENT_PROPERTIES.equals(fileName)) {
                         return FileVisitResult.CONTINUE;
                     }
 
@@ -177,7 +187,7 @@ public class KarafProjectReifier extends VelocityBasedReifier {
     }
 
     private String getProjectVersion() {
-        // TODO: perhpas use the git hash?
+        // TODO: perhaps use the git hash?
         return "1.0-SNAPSHOT";
     }
 
@@ -198,7 +208,7 @@ public class KarafProjectReifier extends VelocityBasedReifier {
     }
 
     private void loadProperties(VelocityContext context, Path profilesDir) throws IOException {
-        Path agentProperties = profilesDir.resolve(AGENT_PROPERTIES);
+        Path agentProperties = profilesDir.resolve(Profiles.FABRIC8_AGENT_PROPERTIES);
         if (Files.exists(agentProperties)) {
             Properties props = readPropertiesFile(agentProperties);
 

@@ -24,7 +24,10 @@ import java.util.Properties;
 
 import io.fabric8.devops.ProjectConfig;
 import io.fabric8.devops.connector.DevOpsConnector;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.config.ConfigHelper;
+import io.fabric8.profiles.config.GitConfigDTO;
 import io.fabric8.repo.git.CreateRepositoryDTO;
 import io.fabric8.repo.git.GitRepoClient;
 import io.fabric8.repo.git.RepositoryDTO;
@@ -48,28 +51,15 @@ import org.slf4j.LoggerFactory;
  */
 public class GitRemoteProcessor extends ProjectProcessor {
 
-    private static final String CURRENT_VERSION_PROPERTY = "currentVersion";
-    private static final String CURRENT_COMMIT_ID_PROPERTY = "currentCommitId";
-
-    private static final String GIT_REMOTE_URI_PROPERTY = "gitRemoteUri";
-    private static final String GIT_REMOTE_NAME_PROPERTY = "gitRemoteName";
-    private static final String GIT_REMOTE_URI_PATTERN_PROPERTY = "gitRemoteUriPattern";
-
     private static final Logger LOG = LoggerFactory.getLogger(GitRemoteProcessor.class);
-
-    private final String currentVersion;
-    private final String currentCommitId;
 
     /**
      * Initialize a processor with default configuration.
      *
      * @param config default configuration properties.
      */
-    public GitRemoteProcessor(Properties config) {
+    public GitRemoteProcessor(JsonNode config) {
         super(config);
-
-        currentVersion = config.getProperty(CURRENT_VERSION_PROPERTY);
-        currentCommitId = config.getProperty(CURRENT_COMMIT_ID_PROPERTY);
     }
 
     @Override
@@ -78,15 +68,27 @@ public class GitRemoteProcessor extends ProjectProcessor {
     }
 
     @Override
-    public void process(String name, Properties config, Path containerDir) throws IOException {
+    public void process(String name, JsonNode config, Path containerDir) throws IOException {
+
+        // skip during testing, etc.
+        if (System.getProperty("skipGitProcessor") != null) {
+            return;
+        }
+
+        // get git config
+        GitConfigDTO configDTO = ConfigHelper.toValue(ProfilesHelpers.merge(config, defaultConfig), "/git", GitConfigDTO.class);
+
         // get or create remote repo URL
-        String remoteUri = config.getProperty(GIT_REMOTE_URI_PROPERTY);
+        String remoteUri = configDTO.getGitRemoteUri();
         if (remoteUri == null || remoteUri.isEmpty()) {
-            remoteUri = getRemoteUri(config, name);
+            remoteUri = getRemoteUri(configDTO, name);
         }
 
         // try to clone remote repo in temp dir
-        String remote = config.getProperty(GIT_REMOTE_NAME_PROPERTY, Constants.DEFAULT_REMOTE_NAME);
+        String remote = configDTO.getGitRemoteName();
+        if (remote == null) {
+            remote = Constants.DEFAULT_REMOTE_NAME;
+        }
         Path tempDirectory = null;
         try {
             tempDirectory = Files.createTempDirectory(containerDir, "cloned-remote-");
@@ -94,13 +96,14 @@ public class GitRemoteProcessor extends ProjectProcessor {
             throwException("Error creating temp directory while cloning ", remoteUri, e);
         }
 
-        final String userName = config.getProperty("gogsUsername");
-        final String password = config.getProperty("gogsPassword");
+        final String userName = configDTO.getGogsUsername();
+        final String password = configDTO.getGogsPassword();
         final UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
             userName, password);
 
         Git clonedRepo = null;
         try {
+            String currentVersion = configDTO.getCurrentVersion();
             try {
                 clonedRepo = Git.cloneRepository()
                     .setDirectory(tempDirectory.toFile())
@@ -111,7 +114,12 @@ public class GitRemoteProcessor extends ProjectProcessor {
                     .call();
             } catch (InvalidRemoteException e) {
                 if (e.getCause() instanceof NoRemoteRepositoryException) {
-                    final String address = "http://" + config.getProperty("gogsServiceHost", "gogs");
+                    final String address;
+                    if (configDTO.getGogsServiceHost() == null) {
+                        address = "http://gogs.vagrant.f8";
+                    } else {
+                        address = "http://" + configDTO.getGogsServiceHost();
+                    }
 
                     GitRepoClient client = new GitRepoClient(address, userName, password);
 
@@ -211,7 +219,7 @@ public class GitRemoteProcessor extends ProjectProcessor {
 
                 // with latest Profile repo commit ID in message
                 // TODO provide other identity properties
-                containerRepo.commit().setMessage("Container updated for commit " + currentCommitId).call();
+                containerRepo.commit().setMessage("Container updated for commit " + configDTO.getCurrentCommitId()).call();
 
                 // push to remote
                 containerRepo.push().setRemote(remote).setCredentialsProvider(credentialsProvider).call();
@@ -230,10 +238,10 @@ public class GitRemoteProcessor extends ProjectProcessor {
         throw new IOException(String.format("%s: %s: %s", message, target, t.getMessage()), t);
     }
 
-    private String getRemoteUri(Properties config, String name) throws IOException {
-        String gitRemotePattern = config.getProperty(GIT_REMOTE_URI_PATTERN_PROPERTY);
+    private String getRemoteUri(GitConfigDTO config, String name) throws IOException {
+        String gitRemotePattern = config.getGitRemoteUriPattern();
         if (gitRemotePattern == null) {
-            throw new IOException("Missing property " + GIT_REMOTE_URI_PATTERN_PROPERTY);
+            throw new IOException("Missing property gitRemoteUriPattern");
         }
         return gitRemotePattern.replace("${name}", name);
     }

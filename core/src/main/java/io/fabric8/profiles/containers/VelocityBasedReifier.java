@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.Log4JLogChute;
@@ -33,11 +35,11 @@ public abstract class VelocityBasedReifier extends ProjectReifier {
     protected final VelocityEngine engine;
 
     /**
-     * Configures reifier with default properties and a velocity engine.
-     * @param properties default property values.
+     * Configures reifier with default configuration and a velocity engine.
+     * @param defaultConfig default configuration values.
      */
-    public VelocityBasedReifier(Properties properties) {
-        super(properties);
+    public VelocityBasedReifier(JsonNode defaultConfig) {
+        super(defaultConfig);
 
         // initialize velocity to load resources from class loader and use Log4J
         Properties velocityProperties = new Properties();

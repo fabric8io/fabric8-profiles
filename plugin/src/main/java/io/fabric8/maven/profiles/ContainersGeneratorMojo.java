@@ -23,10 +23,12 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.fabric8.profiles.Profiles;
+import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.config.ConfigHelper;
 import io.fabric8.profiles.containers.Containers;
 import io.fabric8.profiles.containers.JenkinsfileReifier;
 import io.fabric8.profiles.containers.ProjectReifier;
@@ -57,7 +59,7 @@ public class ContainersGeneratorMojo extends AbstractProfilesMojo {
      * Property map for reifiers, mapping container names to property maps.
      */
     @Parameter(readonly = false, required = false)
-    protected Map<String, Properties> reifierProperties;
+    protected Map<String, Map<String, String>> reifierProperties;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -78,17 +80,17 @@ public class ContainersGeneratorMojo extends AbstractProfilesMojo {
         if (reifierMap == null || reifierMap.isEmpty()) {
 
             // configure with default karaf container reifier
-            final Properties defaultProps = new Properties(profilesProperties);
+            final JsonNode defaultConfig = ConfigHelper.copyObjectNode(profilesConfig);
             if (reifierProperties != null) {
-                final Properties map = reifierProperties.get(KarafProjectReifier.CONTAINER_TYPE);
+                final Map<String, String> map = reifierProperties.get(KarafProjectReifier.CONTAINER_TYPE);
                 if (map != null) {
-                    defaultProps.putAll(map);
+                    ProfilesHelpers.merge(defaultConfig, ConfigHelper.toJson(map));
                 }
             }
 
             // add karaf and jenkins reifiers
-            reifiers.put(KarafProjectReifier.CONTAINER_TYPE, new KarafProjectReifier(defaultProps));
-            reifiers.put(JenkinsfileReifier.CONTAINER_TYPE, new JenkinsfileReifier(defaultProps));
+            reifiers.put(KarafProjectReifier.CONTAINER_TYPE, new KarafProjectReifier(defaultConfig));
+            reifiers.put(JenkinsfileReifier.CONTAINER_TYPE, new JenkinsfileReifier(defaultConfig));
 
         } else {
 
@@ -98,17 +100,17 @@ public class ContainersGeneratorMojo extends AbstractProfilesMojo {
                 final String type = entry.getKey();
                 final String className = entry.getValue();
 
-                final Properties properties = new Properties(profilesProperties);
+                final JsonNode properties = ConfigHelper.copyObjectNode(profilesConfig);
                 if (reifierProperties != null) {
-                    final Properties map = reifierProperties.get(type);
+                    final Map<String, String> map = reifierProperties.get(type);
                     if (map != null) {
-                        properties.putAll(map);
+                        ProfilesHelpers.merge(properties, ConfigHelper.toJson(map));
                     }
                 }
                 try {
                     final Class<?> aClass = classLoader.loadClass(className);
                     final Class<? extends ProjectReifier> reifierClass = aClass.asSubclass(ProjectReifier.class);
-                    final Constructor<? extends ProjectReifier> constructor = reifierClass.getConstructor(Properties.class);
+                    final Constructor<? extends ProjectReifier> constructor = reifierClass.getConstructor(JsonNode.class);
                     reifiers.put(type, constructor.newInstance(properties));
                 } catch (ClassCastException e) {
                     throwMojoException("Class is not of type ProjectReifier", className, e);

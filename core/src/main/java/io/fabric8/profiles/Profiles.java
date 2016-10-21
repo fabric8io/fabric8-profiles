@@ -48,6 +48,8 @@ import static io.fabric8.profiles.ProfilesHelpers.toYamlBytes;
 public class Profiles {
 
     public static final String DEFAULT_PROFILE = "default";
+    public static final String FABRIC8_AGENT_PROPERTIES = "io.fabric8.agent.properties";
+    public static final String ATTRIBUTE_PARENTS = "attribute.parents";
 
     private static final Logger LOG = LoggerFactory.getLogger(Profiles.class);
 
@@ -241,12 +243,12 @@ public class Profiles {
             throw new IOException("Profile directory does not exists: " + path);
         }
         Properties props = new Properties();
-        Path agentProperties = path.resolve("io.fabric8.agent.properties");
+        Path agentProperties = path.resolve(FABRIC8_AGENT_PROPERTIES);
         if (Files.exists(agentProperties)) {
             props = readPropertiesFile(agentProperties);
         }
 
-        String parents = props.getProperty("attribute.parents",
+        String parents = props.getProperty(ATTRIBUTE_PARENTS,
             DEFAULT_PROFILE.equals(profileName) ? "" : DEFAULT_PROFILE);
         for (String parent : parents.split(" ")) {
             parent = parent.trim();

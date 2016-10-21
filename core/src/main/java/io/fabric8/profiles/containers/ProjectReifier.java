@@ -17,7 +17,9 @@ package io.fabric8.profiles.containers;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Properties;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +29,17 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ProjectReifier {
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    protected final Properties defaultProperties;
+    protected final JsonNode defaultProperties;
 
     /**
-     * Configures reifier with default properties.
-     * @param properties default property values.
+     * Configures reifier with default configuration.
+     * @param defaultConfig default configuration values.
      */
-    public ProjectReifier(Properties properties) {
-        this.defaultProperties = new Properties();
-        if (properties != null) {
-            this.defaultProperties.putAll(properties);
+    public ProjectReifier(JsonNode defaultConfig) {
+        if (defaultConfig != null) {
+            this.defaultProperties = defaultConfig.deepCopy();
+        } else {
+            this.defaultProperties = JsonNodeFactory.instance.objectNode();
         }
     }
 
@@ -47,5 +50,5 @@ public abstract class ProjectReifier {
      * @param profilesDir   profile directory with materialized profiles.
      * @throws IOException  on error.
      */
-    public abstract void reify(Path target, Properties config, Path profilesDir) throws IOException;
+    public abstract void reify(Path target, JsonNode config, Path profilesDir) throws IOException;
 }

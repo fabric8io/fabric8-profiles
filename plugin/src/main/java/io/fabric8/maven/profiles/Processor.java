@@ -15,7 +15,7 @@
  */
 package io.fabric8.maven.profiles;
 
-import java.util.Properties;
+import java.util.Map;
 
 /**
  * Configurable {@link io.fabric8.profiles.containers.ProjectProcessor} for {@link ContainersInstallerMojo} mojo.
@@ -23,7 +23,7 @@ import java.util.Properties;
 public class Processor {
 
     private String name;
-    private Properties properties;
+    private Map<String, String> properties;
 
     public String getName() {
         return name;
@@ -33,11 +33,11 @@ public class Processor {
         this.name = name;
     }
 
-    public Properties getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
 
-    public void setProperties(Properties properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 }
