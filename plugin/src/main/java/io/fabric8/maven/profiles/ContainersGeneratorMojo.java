@@ -65,6 +65,14 @@ public class ContainersGeneratorMojo extends AbstractProfilesMojo {
         // initialize inherited fields
         super.execute();
 
+        if (!Files.isDirectory(configs)) {
+            log.info("No containers are present in directory " + configs);
+            return;
+        }
+        if (!Files.isDirectory(profiles)) {
+            throw new MojoExecutionException("Missing profiles directory " + configs);
+        }
+
         // populate default reifiers if not set
         final Map<String, ProjectReifier> reifiers = new HashMap<>();
         if (reifierMap == null || reifierMap.isEmpty()) {

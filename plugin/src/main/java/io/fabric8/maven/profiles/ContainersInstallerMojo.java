@@ -67,6 +67,11 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
         // initialize inherited fields
         super.execute();
 
+        if (!Files.isDirectory(configs)) {
+            log.warn("No containers are present in directory " + configs);
+            return;
+        }
+
         // get current repository branch version to compare against remotes
         try (final Git sourceRepo = Git.open(sourceDirectory)) {
 

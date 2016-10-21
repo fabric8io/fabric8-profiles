@@ -112,13 +112,7 @@ public abstract class AbstractProfilesMojo extends AbstractMojo {
         final Path repository = Paths.get(sourceDirectory.getAbsolutePath());
 
         configs = repository.resolve("configs");
-        if (!Files.isDirectory(configs)) {
-            throw new MojoExecutionException("Missing container directory " + configs);
-        }
         profiles = repository.resolve("profiles");
-        if (!Files.isDirectory(profiles)) {
-            throw new MojoExecutionException("Missing profiles directory " + configs);
-        }
     }
 
     protected void throwMojoException(String message, Object target, Exception e) throws MojoExecutionException {
