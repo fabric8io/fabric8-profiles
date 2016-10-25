@@ -26,7 +26,7 @@
     <version>9</version>
   </parent>
 
-  <name>Fabric8 Profiles</name>
+  <name>Fabric8 Profiles :: Parent</name>
   <description>Abstraction for sharing configuration across apps</description>
 
   <groupId>io.fabric8.profiles</groupId>

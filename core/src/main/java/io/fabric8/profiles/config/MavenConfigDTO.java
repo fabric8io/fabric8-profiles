@@ -25,6 +25,7 @@ public class MavenConfigDTO extends AbstractConfigDTO {
 
     private String groupId;
     private String version;
+    private String name;
     private String description;
 
     public String getGroupId() {
@@ -41,6 +42,14 @@ public class MavenConfigDTO extends AbstractConfigDTO {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {

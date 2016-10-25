@@ -15,18 +15,18 @@
  */
 package io.fabric8.profiles.containers.wildfly;
 
-import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
-
 import java.io.StringWriter;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
 
 
 public class YamlTransformerTest {
@@ -38,7 +38,7 @@ public class YamlTransformerTest {
 
         Path filePath = REPOSITORY_BASE_DIR.resolve("datasource/simple.profile/project-stages.yml");
         
-        Properties props = new Properties();
+        Map<String, Object> props = new HashMap<>();
         props.put("namespace.datasources", "urn:jboss:domain:datasources:4.0");
         YamlTransformer transformer = new YamlTransformer(props).transform(filePath);
 		
@@ -63,7 +63,7 @@ public class YamlTransformerTest {
 
         Path filePath = REPOSITORY_BASE_DIR.resolve("datasource/multiple.profile/project-stages.yml");
         
-        Properties props = new Properties();
+        Map<String, Object> props = new HashMap<>();
         props.put("namespace.datasources", "urn:jboss:domain:datasources:4.0");
         YamlTransformer transformer = new YamlTransformer(props).transform(filePath);
 		

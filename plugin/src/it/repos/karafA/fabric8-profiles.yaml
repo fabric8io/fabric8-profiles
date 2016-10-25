@@ -5,7 +5,7 @@
 # Git remote URI pattern for all containers, name is the name of the container, e.g. root
 git:
 #gitRemoteUriPattern : /tmp/remotes/${name}
-  gitRemoteUriPattern : http://gogs.vagrant.f8/gogsadmin/${name}.git
+  gitRemoteUriPattern : "http://gogs.vagrant.f8/gogsadmin/${name}.git"
   gogsUsername : gogsadmin
   gogsPassword : RedHat$1
 

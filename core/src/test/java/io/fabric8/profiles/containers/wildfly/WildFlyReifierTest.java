@@ -15,17 +15,21 @@
  */
 package io.fabric8.profiles.containers.wildfly;
 
-import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
-
-import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.fabric8.profiles.Profiles;
+import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.config.ContainerConfigDTO;
+import io.fabric8.profiles.config.MavenConfigDTO;
 
 import org.junit.Test;
 
-import io.fabric8.profiles.Profiles;
-import io.fabric8.profiles.ProfilesHelpers;
+import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
+import static io.fabric8.profiles.config.ConfigHelper.fromValue;
+import static io.fabric8.profiles.config.ConfigHelper.toValue;
 
 public class WildFlyReifierTest {
 
@@ -42,25 +46,27 @@ public class WildFlyReifierTest {
 		ProfilesHelpers.deleteDirectory(materialized);
 		Files.createDirectories(materialized);
 
-		Path config = REPOSITORY_BASE_DIR.resolve("configs/containers/root.cfg");
-		String[] profileNames = ProfilesHelpers.readPropertiesFile(config).getProperty("profiles").split(" ");
+		Path config = REPOSITORY_BASE_DIR.resolve("configs/containers/root.yaml");
+        ContainerConfigDTO containerConfigDTO = toValue(ProfilesHelpers.readYamlFile(config), ContainerConfigDTO.class);
+        String[] profileNames = containerConfigDTO.getProfiles().split(" ");
 		new Profiles(REPOSITORY_BASE_DIR.resolve("profiles")).materialize(materialized, profileNames);
 
 		WildFlyProjectReifier reifier;
-		Path defaultPath = materialized.resolve("default.properties");
-		try (FileInputStream input = new FileInputStream(defaultPath.toFile())) {
-			Properties properties = new Properties();
-			properties.load(input);
-			reifier = new WildFlyProjectReifier(properties);
-		}
+		Path defaultPath = materialized.resolve("default.yaml");
+		JsonNode defaultConfig = ProfilesHelpers.readYamlFile(defaultPath);
+		reifier = new WildFlyProjectReifier(defaultConfig);
 
-		Properties properties = new Properties();
-		properties.put("groupId", "io.fabric8.profiles.test");
-		properties.put("artifactId", "wildfly-swarm-test");
-		properties.put("version", "1.0-SNAPSHOT");
-		properties.put("name", "WildFly Swarm Profile Test");
-		properties.put("description", "WildFly Swarm Camel Container");
+        final MavenConfigDTO mavenConfigDTO = new MavenConfigDTO();
+        mavenConfigDTO.setGroupId("io.fabric8.profiles.test");
+        mavenConfigDTO.setVersion("1.0-SNAPSHOT");
+        mavenConfigDTO.setName("WildFly Swarm Profile Test");
+        mavenConfigDTO.setDescription("WildFly Swarm Camel Container");
+        containerConfigDTO = new ContainerConfigDTO();
+        containerConfigDTO.setName("wildfly-swarm-test");
 
-		reifier.reify(target, properties, materialized);
+        final ObjectNode containerConfig = (ObjectNode) fromValue(mavenConfigDTO);
+        containerConfig.set("container", fromValue(containerConfigDTO).get("container"));
+
+		reifier.reify(target, containerConfig, materialized);
 	}
 }

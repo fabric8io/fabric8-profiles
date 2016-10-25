@@ -1,0 +1,4 @@
+# maven project properties
+maven:
+  groupId: io.fabric8.profiles.containers
+  version: 1.0-SNAPSHOT

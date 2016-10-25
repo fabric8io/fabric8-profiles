@@ -52,14 +52,14 @@
       <dependency>
         <groupId>io.fabric8</groupId>
         <artifactId>fabric8-project-bom-with-platform-deps</artifactId>
-        <version>\${fabric8.version}</version>
+        <version>\$\{fabric8.version\}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.jboss.fuse.bom</groupId>
         <artifactId>jboss-fuse-parent</artifactId>
-        <version>\${fuse.version}</version>
+        <version\$\{fuse.version\}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -74,7 +74,7 @@
       and the feature repo itself is not added in etc/org.apache.karaf.features.cfg file -->
       <groupId>org.jboss.fuse</groupId>
       <artifactId>fuse-karaf-framework</artifactId>
-      <version>\${fuse.version}</version>
+      <version\$\{fuse.version\}</version>
       <type>kar</type>
       <!-- no need to download kar dependencies -->
       <exclusions>
@@ -87,7 +87,7 @@
   </dependencies>
 
   <build>
-    <finalName>\${project.artifactId}</finalName>
+    <finalName\$\{project.artifactId\}</finalName>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
@@ -109,7 +109,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>\${version.maven-bundle-plugin}</version>
+        <version\$\{version.maven-bundle-plugin\}</version>
         <extensions>true</extensions>
       </plugin>
 
@@ -117,7 +117,7 @@
       <plugin>
         <groupId>org.apache.karaf.tooling</groupId>
         <artifactId>karaf-maven-plugin</artifactId>
-        <version>\${karaf.plugin.version}</version>
+        <version\$\{karaf.plugin.version\}</version>
         <extensions>true</extensions>
         <configuration>
           <!-- we are using karaf 2.4.x -->
@@ -185,7 +185,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>fabric8-maven-plugin</artifactId>
-        <version>\${fabric8.version}</version>
+        <version\$\{fabric8.version\}</version>
         <executions>
           <execution>
             <id>generate-resource</id>

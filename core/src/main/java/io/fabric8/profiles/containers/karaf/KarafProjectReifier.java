@@ -33,7 +33,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import io.fabric8.profiles.containers.Containers;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.fabric8.profiles.Profiles;
 import io.fabric8.profiles.ProfilesHelpers;
@@ -87,9 +86,6 @@ public class KarafProjectReifier extends VelocityBasedReifier {
             writer = new BufferedWriter(new FileWriter(pojoFile));
 
             final MavenConfigDTO mavenConfigDTO = toValue(config, MavenConfigDTO.class);
-            if (mavenConfigDTO.getArtifactId() == null) {
-                mavenConfigDTO.setArtifactId(Containers.NAME_PROPERTY);
-            }
             if (mavenConfigDTO.getGroupId() == null) {
                 mavenConfigDTO.setGroupId("container");
             }
@@ -184,11 +180,6 @@ public class KarafProjectReifier extends VelocityBasedReifier {
                 writer.close();
             }
         }
-    }
-
-    private String getProjectVersion() {
-        // TODO: perhaps use the git hash?
-        return "1.0-SNAPSHOT";
     }
 
     static private String extension(String fileName) {

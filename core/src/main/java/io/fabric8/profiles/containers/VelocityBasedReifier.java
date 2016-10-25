@@ -73,4 +73,9 @@ public abstract class VelocityBasedReifier extends ProjectReifier {
 	
 	    return values;
 	}
+
+    protected String getProjectVersion() {
+        // TODO: perhaps use the git hash?
+        return "1.0-SNAPSHOT";
+    }
 }

@@ -21,32 +21,26 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
+
+import com.fasterxml.jackson.dataformat.yaml.snakeyaml.Yaml;
+import io.fabric8.profiles.IllegalArgumentAssertion;
+import io.fabric8.profiles.IllegalStateAssertion;
 
 import org.jdom.Element;
 import org.jdom.Namespace;
-
-import com.fasterxml.jackson.dataformat.yaml.snakeyaml.Yaml;
-
-import io.fabric8.profiles.IllegalArgumentAssertion;
-import io.fabric8.profiles.IllegalStateAssertion;
 
 public class YamlTransformer implements Iterable<String> {
 
 	private final Map<String, Namespace> namespaces = new HashMap<>();
 	private Map<String, ?> result;
 	
-	public YamlTransformer(Properties properties) {
-		Enumeration<?> names = properties.propertyNames();
-		while (names.hasMoreElements()) {
-			String key = (String) names.nextElement();
-			if (key.toString().startsWith("namespace.")) {
-				String value = properties.getProperty(key);
-				namespaces.put(key.substring(10), Namespace.getNamespace(value));
+	public YamlTransformer(Map<String, Object> properties) {
+		for (Map.Entry<String, Object> entry : properties.entrySet()) {
+			if (entry.getKey().startsWith("namespace.")) {
+				namespaces.put(entry.getKey().substring(10), Namespace.getNamespace(entry.getValue().toString()));
 			}
 		}
 	}

@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
 import static io.fabric8.profiles.config.ConfigHelper.fromValue;
+import static io.fabric8.profiles.config.ConfigHelper.toValue;
 
 /**
  * Test Karaf reifier.
@@ -49,15 +50,16 @@ public class KarafReifierTest {
         ProfilesHelpers.deleteDirectory(materialized);
         Files.createDirectories(materialized);
 
-        final Path containerConfig = REPOSITORIES_BASE_DIR.resolve("karafA/configs/containers/root.cfg");
-        String[] profileNames = ProfilesHelpers.readPropertiesFile(containerConfig).getProperty("profiles").replaceAll(" ?fabric-ensemble-\\S+", "").split(" ");
+        final Path containerConfig = REPOSITORIES_BASE_DIR.resolve("karafA/configs/containers/root.yaml");
+        ContainerConfigDTO containerConfigDTO = toValue(ProfilesHelpers.readYamlFile(containerConfig), ContainerConfigDTO.class);
+        String[] profileNames = containerConfigDTO.getProfiles().replaceAll(" ?fabric-ensemble-\\S+", "").split(" ");
         new Profiles(repository).materialize(materialized, profileNames);
 
         final MavenConfigDTO mavenConfigDTO = new MavenConfigDTO();
         mavenConfigDTO.setGroupId("io.fabric8.quickstarts");
         mavenConfigDTO.setVersion("1.0-SNAPSHOT");
         mavenConfigDTO.setDescription("Karaf root container");
-        final ContainerConfigDTO containerConfigDTO = new ContainerConfigDTO();
+        containerConfigDTO = new ContainerConfigDTO();
         containerConfigDTO.setName("root");
 
         final ObjectNode config = (ObjectNode) fromValue(mavenConfigDTO);
