@@ -14,8 +14,8 @@ public class ContainerEditJvmOptions extends AbstractProfilesProjectCommand {
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ContainerEditJvmOptions.class)
-				.name("pcontainer-edit-jvm-options")
-				.category(Categories.create("PContainer Profiles"));
+				.name("PContainer: Edit JVM Options")
+				.category(Categories.create("Fabric8 Profiles"));
 	}
 
 	@Override

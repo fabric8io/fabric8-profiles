@@ -30,4 +30,8 @@ public interface ProfileResource extends DelegatingResource<DirectoryResource, F
     Iterable<ProfileResource> getParentProfiles() throws IOException;
 
     void setParentProfiles(Iterable<ProfileResource> parents) throws IOException;
+
+    void rename(String name);
+
+    void copyTo(String name);
 }

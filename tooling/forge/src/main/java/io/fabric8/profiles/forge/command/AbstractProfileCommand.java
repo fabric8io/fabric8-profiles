@@ -30,7 +30,7 @@ import org.jboss.forge.addon.ui.metadata.WithAttributes;
 public abstract class AbstractProfileCommand extends AbstractProfilesProjectCommand {
 
     @Inject
-    @WithAttributes(label = "Fabric8 Profile", required = true, description = "Fabric8 Profile for operation.")
+    @WithAttributes(label = "Profile", required = true, description = "Fabric8 Profile for operation.")
     protected UIInput<ProfileResource> profile;
 
     @Override

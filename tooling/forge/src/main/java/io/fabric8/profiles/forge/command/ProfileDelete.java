@@ -14,8 +14,8 @@ public class ProfileDelete extends AbstractProfileCommand {
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
-		return Metadata.forCommand(ContainerAddProfiles.class)
-			.name("Fabric8 Profiles: Profile Delete")
+		return Metadata.forCommand(ProfileDelete.class)
+			.name("Profile: Delete")
 			.description("Deletes a Fabric8 Profile")
 			.category(Categories.create("Fabric8 Profiles"));
 	}

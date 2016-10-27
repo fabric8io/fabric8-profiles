@@ -14,7 +14,7 @@ public class ProfileEdit extends AbstractProfilesProjectCommand {
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ProfileEdit.class).name("profile-edit")
-				.category(Categories.create("PContainer Profiles"));
+				.category(Categories.create("Fabric8 Profiles"));
 	}
 
 	@Override

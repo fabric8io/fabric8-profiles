@@ -19,13 +19,13 @@ import org.jboss.forge.addon.ui.util.Metadata;
 public class ContainerRemoveProfiles extends AbstractContainerCommand {
 
 	@Inject
-	@WithAttributes(label = "Profiles to remove", required = true)
+	@WithAttributes(label = "Profiles", required = true)
 	private UISelectMany<ProfileResource> profiles;
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
-		return Metadata.forCommand(ContainerAddProfiles.class)
-			.name("Fabric8 Profiles: PContainer Remove Profiles")
+		return Metadata.forCommand(ContainerRemoveProfiles.class)
+			.name("PContainer: Remove Profiles")
 			.description("Removes Profiles from a PContainer")
 			.category(Categories.create("Fabric8 Profiles"));
 	}

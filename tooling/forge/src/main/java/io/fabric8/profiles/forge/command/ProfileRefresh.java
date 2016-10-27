@@ -15,7 +15,7 @@ public class ProfileRefresh extends AbstractProfilesProjectCommand {
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ProfileRefresh.class)
 				.name("profile-refresh")
-				.category(Categories.create("PContainer Profiles"));
+				.category(Categories.create("Fabric8 Profiles"));
 	}
 
 	@Override

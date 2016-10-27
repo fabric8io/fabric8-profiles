@@ -34,13 +34,13 @@ import org.jboss.forge.addon.ui.util.Metadata;
 public class ContainerAddProfiles extends AbstractContainerCommand {
 
     @Inject
-    @WithAttributes(label = "Profiles to add", required = true, description = "Fabric Profiles to add to the container.")
+    @WithAttributes(label = "Profiles", required = true, description = "Fabric Profiles to add to the container.")
     private UIInputMany<ProfileResource> profiles;
 
     @Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ContainerAddProfiles.class)
-				.name("Fabric8 Profiles: PContainer Add Profiles")
+				.name("PContainer: Add Profiles")
 				.description("Adds Profiles to a PContainer")
 				.category(Categories.create("Fabric8 Profiles"));
 	}

@@ -13,7 +13,7 @@ public class ContainerList extends AbstractProfilesProjectCommand {
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
-		return Metadata.forCommand(ContainerList.class).name("Fabric8 Profiles: PContainer List")
+		return Metadata.forCommand(ContainerList.class).name("PContainer: List")
 				.category(Categories.create("Fabric8 Profiles"));
 	}
 

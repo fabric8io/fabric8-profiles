@@ -13,8 +13,8 @@ public class ContainerInfo extends AbstractProfilesProjectCommand {
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
-		return Metadata.forCommand(ContainerInfo.class).name("pcontainer-info")
-				.category(Categories.create("PContainer Profiles"));
+		return Metadata.forCommand(ContainerInfo.class).name("PContainer: Info")
+				.category(Categories.create("Fabric8 Profiles"));
 	}
 
 	@Override

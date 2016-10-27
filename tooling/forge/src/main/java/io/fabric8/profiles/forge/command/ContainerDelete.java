@@ -14,8 +14,8 @@ public class ContainerDelete extends AbstractContainerCommand {
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
-		return Metadata.forCommand(ContainerAddProfiles.class)
-			.name("Fabric8 Profiles: PContainer Delete")
+		return Metadata.forCommand(ContainerDelete.class)
+			.name("PContainer: Delete")
 			.description("Deletes a PContainer")
 			.category(Categories.create("Fabric8 Profiles"));
 	}

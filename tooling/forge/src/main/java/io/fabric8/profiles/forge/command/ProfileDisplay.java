@@ -15,7 +15,7 @@ public class ProfileDisplay extends AbstractProfilesProjectCommand {
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ProfileDisplay.class)
 				.name("profile-display")
-				.category(Categories.create("PContainer Profiles"));
+				.category(Categories.create("Fabric8 Profiles"));
 	}
 
 	@Override

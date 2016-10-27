@@ -30,7 +30,7 @@ import org.jboss.forge.addon.ui.metadata.WithAttributes;
 public abstract class AbstractContainerCommand extends AbstractProfilesProjectCommand {
 
     @Inject
-    @WithAttributes(label = "Profiled Container", required = true, description = "Profiled container name")
+    @WithAttributes(label = "Container", required = true, description = "Profiled container name")
     protected UIInput<PContainerResource> container;
 
     @Override

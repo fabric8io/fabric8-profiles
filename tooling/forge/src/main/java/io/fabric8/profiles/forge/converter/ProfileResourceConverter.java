@@ -15,6 +15,7 @@
  */
 package io.fabric8.profiles.forge.converter;
 
+import java.io.File;
 import javax.inject.Inject;
 
 import io.fabric8.profiles.forge.ProfileUtils;
@@ -42,6 +43,10 @@ public class ProfileResourceConverter implements Converter<String, ProfileResour
 
     @Override
     public ProfileResource convert(String value) {
+        // for multi-value inputs, value is showing up as rootDir/profile FileResource
+        if (value.contains(File.separator)) {
+            value = value.substring(value.lastIndexOf(File.separatorChar));
+        }
         ProfileResource profile = profileUtils.getProfile(project.getRoot().reify(DirectoryResource.class), value);
         if (profile == null || !profile.exists()) {
             throw new ResourceException("Missing Profile " + value);

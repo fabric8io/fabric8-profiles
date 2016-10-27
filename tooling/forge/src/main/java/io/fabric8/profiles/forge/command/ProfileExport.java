@@ -14,7 +14,7 @@ public class ProfileExport extends AbstractProfilesProjectCommand {
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ProfileExport.class).name("profile-export")
-				.category(Categories.create("PContainer Profiles"));
+				.category(Categories.create("Fabric8 Profiles"));
 	}
 
 	@Override

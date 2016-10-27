@@ -21,16 +21,16 @@ import org.jboss.forge.addon.ui.util.Metadata;
 public class ProfileCreate extends AbstractProfilesProjectCommand {
 
     @Inject
-	@WithAttributes(label = "Fabric8 Profile Name", required = true, description = "Fabric8 Profile name to create.")
+	@WithAttributes(label = "Name", required = true, description = "Fabric8 Profile name to create.")
 	private UIInput<String> name;
 
 	@Inject
-	@WithAttributes(label = "Fabric8 Profile Parents", required = false, description = "Fabric8 Profile parents for the new Profile.")
+	@WithAttributes(label = "Parent Profiles", required = false, description = "Fabric8 Profile parents for the new Profile.")
 	private UISelectMany<ProfileResource> parents;
 
     @Override
 	public UICommandMetadata getMetadata(UIContext context) {
-		return Metadata.forCommand(ProfileCreate.class).name("Fabric8 Profiles: Profile Create")
+		return Metadata.forCommand(ProfileCreate.class).name("Profile: Create")
 				.category(Categories.create("Fabric8 Profiles"));
 	}
 

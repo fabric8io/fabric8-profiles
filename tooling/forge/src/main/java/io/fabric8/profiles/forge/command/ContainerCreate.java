@@ -41,21 +41,21 @@ public class ContainerCreate extends AbstractProfilesProjectCommand {
     private static final String DEFAULT_PROFILES = "default";
 
 	@Inject
-	@WithAttributes(label = "Profiled Container Name", required = true, description = "Fabric8 Profiled Container name.")
+	@WithAttributes(label = "Name", required = true, description = "Fabric8 Profiled Container name.")
 	private UIInput<String> name;
 
 	@Inject
-	@WithAttributes(label = "Container Profiles", required = true, description = "Fabric8 Profiles to deploy.")
+	@WithAttributes(label = "Profiles", required = true, description = "Fabric8 Profiles to deploy.")
 	private UISelectMany<ProfileResource> profiles;
 
 	@Inject
-	@WithAttributes(label = "Profiled Container Name", required = true, description = "Fabric8 Container Type.", defaultValue = DEFAULT_CONTAINER_TYPES)
+	@WithAttributes(label = "Container Types", required = true, description = "Fabric8 Container Types.", defaultValue = DEFAULT_CONTAINER_TYPES)
 	private UIInput<String> containerTypes;
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ContainerCreate.class)
-			.name("Fabric8 Profiles: PContainer Create")
+			.name("PContainer: Create")
 			.category(Categories.create("Fabric8 Profiles"));
 	}
 

@@ -108,7 +108,7 @@ public class ProjectSetup extends AbstractProfilesCommand {
     @Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ProjectSetup.class)
-				.name("Fabric8 Profiles: Setup")
+				.name("Setup")
 				.category(Categories.create("Fabric8 Profiles"));
 	}
 

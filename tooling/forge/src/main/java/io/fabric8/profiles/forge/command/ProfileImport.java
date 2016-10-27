@@ -14,7 +14,7 @@ public class ProfileImport extends AbstractProfilesProjectCommand {
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ProfileImport.class).name("profile-import")
-				.category(Categories.create("PContainer Profiles"));
+				.category(Categories.create("Fabric8 Profiles"));
 	}
 
 	@Override

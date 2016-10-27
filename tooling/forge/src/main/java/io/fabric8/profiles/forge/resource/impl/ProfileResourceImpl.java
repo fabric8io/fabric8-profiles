@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Properties;
 
 import io.fabric8.profiles.Profiles;
+import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.profiles.forge.ProfileUtils;
 import io.fabric8.profiles.forge.ResourceUtils;
 import io.fabric8.profiles.forge.resource.ProfileResource;
@@ -99,6 +100,12 @@ public class ProfileResourceImpl extends AbstractDelegatingResourceImpl<Director
         // create agent properties file and set parents
         FileResource propFile = getAgentPropertiesFile();
         Properties properties = new Properties();
+        // read existing properties
+        try (InputStream is = propFile.getResourceInputStream()) {
+            properties.load(is);
+        } catch (IOException e) {
+            throw new ResourceException(e.getMessage(), e);
+        }
         if (parents != null && parents.iterator().hasNext()) {
             properties.setProperty(Profiles.ATTRIBUTE_PARENTS, profileUtils.getProfileNameList(parents));
         }
@@ -109,7 +116,25 @@ public class ProfileResourceImpl extends AbstractDelegatingResourceImpl<Director
             throw new ResourceException(e.getMessage(), e);
         }
         propFile.setContents(writer.toString());
-        propFile.createNewFile();
+    }
+
+    @Override
+    public void rename(String name) {
+        File file = getUnderlyingResourceObject().getAbsoluteFile();
+        if (!file.renameTo(new File(file.getParent(), name))) {
+            throw new ResourceException(
+                String.format("Failed to rename profile %s to %s", file.getName(), name));
+        }
+    }
+
+    @Override
+    public void copyTo(String name) {
+        File file = getUnderlyingResourceObject().getAbsoluteFile();
+        try {
+            ProfilesHelpers.copyDirectory(file.toPath(), new File(file.getParent(), name).toPath());
+        } catch (IOException e) {
+            throw new ResourceException(e.getMessage(), e);
+        }
     }
 
     private FileResource getAgentPropertiesFile() {

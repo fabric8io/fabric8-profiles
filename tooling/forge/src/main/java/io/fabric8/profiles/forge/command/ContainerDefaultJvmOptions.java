@@ -14,8 +14,8 @@ public class ContainerDefaultJvmOptions extends AbstractProfilesProjectCommand {
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(ContainerDefaultJvmOptions.class)
-				.name("pcontainer-default-jvm-options")
-				.category(Categories.create("PContainer Profiles"));
+				.name("PContainer: Default JVM Options")
+				.category(Categories.create("Fabric8 Profiles"));
 	}
 
 	@Override
