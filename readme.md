@@ -1,5 +1,5 @@
-Kubeflix: Kubernetes integration of Netflix components
-------------------------------------------------------
+Fabric8 Profiles: Composable configuration for Fabric8 Microservices
+--------------------------------------------------------------------
 
 This project provides [Fabric8 V1](https://github.com/jboss-fuse/fabric8/) style Profiles support for [Fabric8](http://fabric8.io/).
 
