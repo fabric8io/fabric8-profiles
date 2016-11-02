@@ -27,7 +27,7 @@ node {
       .inside {
 
     stage 'Deploy'
-    # TODO: add a build parameter to pass the namespace
+    // TODO: add a build parameter to pass the namespace
     sh 'mvn -Pf8-local-deploy -Dfabric8.namespace=default'
   }
 }
