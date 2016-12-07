@@ -137,6 +137,7 @@
       </plugin>
 
       <!-- Build integration test project -->
+<!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
@@ -154,6 +155,9 @@
           <settingsFile>src/it/settings.xml</settingsFile>
           <showErrors>true</showErrors>
           <ignoreFailures>false</ignoreFailures>
+          <properties>
+              <skipGitProcessor/>
+          </properties>
           <goals>
             <goal>clean</goal>
             <goal>install</goal>
@@ -171,7 +175,7 @@
         </executions>
       </plugin>
 
-      <!-- Build sample profile project archive from integration test -->
+      &lt;!&ndash; Build sample profile project archive from integration test &ndash;&gt;
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -195,6 +199,7 @@
           </execution>
         </executions>
       </plugin>
+-->
 
     </plugins>
   </build>

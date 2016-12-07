@@ -24,7 +24,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.config.ConfigHelper;
 import io.fabric8.profiles.containers.GitRemoteProcessor;
 import io.fabric8.profiles.containers.ProjectProcessor;
 
@@ -82,8 +85,9 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
             }
 
             // add current version and commit id to config
-            profilesProperties.setProperty(CURRENT_VERSION_PROPERTY, currentVersion);
-            profilesProperties.setProperty(CURRENT_COMMIT_ID_PROPERTY, currentCommitId.name());
+            ObjectNode gitNode = profilesConfig.with("git");
+            gitNode.put(CURRENT_VERSION_PROPERTY, currentVersion);
+            gitNode.put(CURRENT_COMMIT_ID_PROPERTY, currentCommitId.name());
 
             // build processor list
             if (projectProcessors != null && !projectProcessors.isEmpty()) {
@@ -99,8 +103,8 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
                         final Class<? extends ProjectProcessor> reifierClass = aClass.asSubclass(ProjectProcessor.class);
                         final Constructor<? extends ProjectProcessor> constructor = reifierClass.getConstructor(Properties.class);
 
-                        Properties properties = new Properties(profilesProperties);
-                        properties.putAll(processor.getProperties());
+                        JsonNode properties = ConfigHelper.copyObjectNode(profilesConfig);
+                        ConfigHelper.putAll((ObjectNode) properties, processor.getProperties());
                         processors[i++] = constructor.newInstance(properties);
                     } catch (ClassCastException e) {
                         throwMojoException("Class is not of type ProjectProcessor", className, e);
@@ -109,7 +113,7 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
                     }
                 }
             } else {
-                processors = new ProjectProcessor[] { new GitRemoteProcessor(profilesProperties) };
+                processors = new ProjectProcessor[] { new GitRemoteProcessor(profilesConfig) };
             }
 
             // list all containers, and update under targetDirectory
@@ -141,10 +145,10 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
     protected void manageContainer(Path target, Path configFile) throws MojoExecutionException {
 
         // read container config
-        Properties config = null;
+        JsonNode config = null;
         try {
-            config = new Properties(profilesProperties);
-            config.putAll(ProfilesHelpers.readPropertiesFile(configFile));
+            config = ConfigHelper.copyObjectNode(profilesConfig);
+            ProfilesHelpers.merge(config, ProfilesHelpers.readYamlFile(configFile));
         } catch (IOException e) {
             throwMojoException("Error reading container configuration", configFile, e);
         }

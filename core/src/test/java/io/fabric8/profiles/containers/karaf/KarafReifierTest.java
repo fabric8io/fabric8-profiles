@@ -17,15 +17,19 @@ package io.fabric8.profiles.containers.karaf;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.profiles.Profiles;
 import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.profiles.containers.VelocityBasedReifier;
+import io.fabric8.profiles.config.ContainerConfigDTO;
+import io.fabric8.profiles.config.MavenConfigDTO;
 
 import org.junit.Test;
 
 import static io.fabric8.profiles.TestHelpers.PROJECT_BASE_DIR;
+import static io.fabric8.profiles.config.ConfigHelper.fromValue;
+import static io.fabric8.profiles.config.ConfigHelper.toValue;
 
 /**
  * Test Karaf reifier.
@@ -46,18 +50,22 @@ public class KarafReifierTest {
         ProfilesHelpers.deleteDirectory(materialized);
         Files.createDirectories(materialized);
 
-        final Path containerConfig = REPOSITORIES_BASE_DIR.resolve("karafA/configs/containers/root.cfg");
-        String[] profileNames = ProfilesHelpers.readPropertiesFile(containerConfig).getProperty("profiles").replaceAll(" ?fabric-ensemble-\\S+", "").split(" ");
+        final Path containerConfig = REPOSITORIES_BASE_DIR.resolve("karafA/configs/containers/root.yaml");
+        ContainerConfigDTO containerConfigDTO = toValue(ProfilesHelpers.readYamlFile(containerConfig), ContainerConfigDTO.class);
+        String[] profileNames = containerConfigDTO.getProfiles().replaceAll(" ?fabric-ensemble-\\S+", "").split(" ");
         new Profiles(repository).materialize(materialized, profileNames);
 
-        final Properties containerProperties = new Properties();
-        containerProperties.put("groupId", "io.fabric8.quickstarts");
-        containerProperties.put("artifactId", "root");
-        containerProperties.put("version", "1.0-SNAPSHOT");
-        containerProperties.put("name", "root");
-        containerProperties.put("description", "Karaf root container");
+        final MavenConfigDTO mavenConfigDTO = new MavenConfigDTO();
+        mavenConfigDTO.setGroupId("io.fabric8.quickstarts");
+        mavenConfigDTO.setVersion("1.0-SNAPSHOT");
+        mavenConfigDTO.setDescription("Karaf root container");
+        containerConfigDTO = new ContainerConfigDTO();
+        containerConfigDTO.setName("root");
+
+        final ObjectNode config = (ObjectNode) fromValue(mavenConfigDTO);
+        config.set("container", fromValue(containerConfigDTO).get("container"));
 
         final VelocityBasedReifier reifier = new KarafProjectReifier(null);
-        reifier.reify(target, containerProperties, materialized);
+        reifier.reify(target, config, materialized);
     }
 }

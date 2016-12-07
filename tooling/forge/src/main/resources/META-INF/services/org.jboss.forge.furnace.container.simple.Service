@@ -13,4 +13,11 @@
 #  implied.  See the License for the specific language governing
 #  permissions and limitations under the License.
 #
-namespace.datasources=urn:jboss:domain:datasources:4.0
+
+io.fabric8.profiles.forge.impl.ContainerUtilsImpl
+io.fabric8.profiles.forge.impl.ProfileUtilsImpl
+io.fabric8.profiles.forge.impl.ResourceUtilsImpl
+#io.fabric8.profiles.forge.resource.impl.YamlConfigResourceImpl
+io.fabric8.profiles.forge.resource.impl.YamlConfigResourceGenerator
+io.fabric8.profiles.forge.resource.impl.PContainerResourceGenerator
+io.fabric8.profiles.forge.resource.impl.ProfileResourceGenerator

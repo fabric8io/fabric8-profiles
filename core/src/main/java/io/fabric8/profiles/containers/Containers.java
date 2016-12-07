@@ -22,26 +22,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.profiles.Profiles;
 import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.config.ContainerConfigDTO;
 import io.fabric8.profiles.containers.karaf.KarafProjectReifier;
+
+import static io.fabric8.profiles.config.ConfigHelper.fromValue;
+import static io.fabric8.profiles.config.ConfigHelper.toValue;
 
 /**
  * Utility class for reading container configurations and generating containers.
  */
 public class Containers {
 
-    public static final String NAME_PROPERTY = "name";
-    public static final String PROFILES_PROPERTY = "profiles";
-    public static final String CONTAINER_TYPE_PROPERTY = "container-type";
-
     private static final String DEFAULT_CONTAINER_TYPE =
         KarafProjectReifier.CONTAINER_TYPE + " " + JenkinsfileReifier.CONTAINER_TYPE;
 
-    private static final String CONTAINERS = "containers/%s.cfg";
+    private static final String CONTAINERS = "containers/%s.yaml";
+    private static final String CONTAINER_FIELD = "container";
 
     private final Path repository;
     private final Profiles profiles;
@@ -65,12 +66,18 @@ public class Containers {
      */
     public void reify(Path target, String name) throws IOException {
         // read container config
-        final Properties config = getContainerConfig(name);
+        ObjectNode containerConfig = getContainerConfig(name);
+        final ContainerConfigDTO config = toValue(containerConfig, ContainerConfigDTO.class);
+        config.setName(name);
+        if (config.getContainerType() == null) {
+            config.setContainerType(DEFAULT_CONTAINER_TYPE);
+        }
+        containerConfig.set(CONTAINER_FIELD, fromValue(config).get(CONTAINER_FIELD));
 
         // container profiles and types
         List<String> containerProfiles = Arrays.asList(
-            config.getProperty(PROFILES_PROPERTY, Profiles.DEFAULT_PROFILE).split(" "));
-        final String[] containerType = config.getProperty(CONTAINER_TYPE_PROPERTY, DEFAULT_CONTAINER_TYPE).split(" ");
+            config.getProfiles().split(" "));
+        final String[] containerType = config.getContainerType().split(" ");
 
         // get reifier from type
         final ProjectReifier[] reifiers = getProjectReifiers(containerType);
@@ -89,11 +96,14 @@ public class Containers {
 
             // reify
             for (ProjectReifier reifier : reifiers) {
-                reifier.reify(target, config, profilesDir);
+                reifier.reify(target, containerConfig, profilesDir);
             }
 
         } finally {
-            ProfilesHelpers.deleteDirectory(profilesDir);
+            try {
+                ProfilesHelpers.deleteDirectory(profilesDir);
+            } catch (IOException ignore) {
+            }
         }
     }
 
@@ -109,13 +119,11 @@ public class Containers {
         return reifiers.toArray(new ProjectReifier[reifiers.size()]);
     }
 
-    private Properties getContainerConfig(String name) throws IOException {
+    private ObjectNode getContainerConfig(String name) throws IOException {
         final Path configPath = repository.resolve(String.format(CONTAINERS, name));
         if (!Files.exists(configPath)) {
             throw new IOException("Missing container config " + configPath);
         }
-        final Properties config = ProfilesHelpers.readPropertiesFile(configPath);
-        config.put(NAME_PROPERTY, name);
-        return config;
+        return (ObjectNode) ProfilesHelpers.readYamlFile(configPath);
     }
 }

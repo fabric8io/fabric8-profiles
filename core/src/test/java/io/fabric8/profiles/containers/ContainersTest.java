@@ -18,10 +18,12 @@ package io.fabric8.profiles.containers;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Properties;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.fabric8.profiles.Profiles;
 import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.config.ConfigHelper;
+import io.fabric8.profiles.config.MavenConfigDTO;
 import io.fabric8.profiles.containers.karaf.KarafProjectReifier;
 
 import org.junit.Test;
@@ -54,9 +56,10 @@ public class ContainersTest {
         // copy integration test repository
         ProfilesHelpers.copyDirectory(REPOSITORIES_BASE_DIR.resolve("karafA"), repository);
 
-        final Properties karafDefaults = new Properties();
-        karafDefaults.put("groupId", "io.fabric8.karaf-swarm");
-        karafDefaults.put("description", "Karaf Swarm container");
+        final MavenConfigDTO mavenConfigDTO = new MavenConfigDTO();
+        mavenConfigDTO.setGroupId("io.fabric8.karaf-swarm");
+        mavenConfigDTO.setDescription("Karaf Swarm container");
+        final JsonNode karafDefaults = ConfigHelper.fromValue(mavenConfigDTO);
 
         final HashMap<String, ProjectReifier> reifierMap = new HashMap<>();
         reifierMap.put(KarafProjectReifier.CONTAINER_TYPE, new KarafProjectReifier(karafDefaults));

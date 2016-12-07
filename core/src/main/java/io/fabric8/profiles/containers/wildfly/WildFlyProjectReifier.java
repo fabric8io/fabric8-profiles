@@ -31,13 +31,20 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.config.ContainerConfigDTO;
+import io.fabric8.profiles.config.MavenConfigDTO;
+import io.fabric8.profiles.config.ProjectPropertiesDTO;
+import io.fabric8.profiles.containers.VelocityBasedReifier;
+
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
-import io.fabric8.profiles.containers.VelocityBasedReifier;
+import static io.fabric8.profiles.config.ConfigHelper.toValue;
 
 /**
  * Reify WildFly container from Profiles
@@ -56,47 +63,55 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 	private static final String SYSTEM_PREFIX = "system.";
 
 	private static final String SWARM_FRACTION_PROPERTIES = "fraction.properties";
+	private static final String MAIN_CLASS_PROPERTY = "mainClass";
 
-	public WildFlyProjectReifier(Properties properties) {
-		super(properties);
+	public WildFlyProjectReifier(JsonNode defaultConfig) {
+		super(defaultConfig);
 	}
 
-	public void reify(Path target, Properties config, Path profilesDir) throws IOException {
+	@Override
+	public void reify(Path target, JsonNode config, Path profilesDir) throws IOException {
 		// reify maven project using template
-		Properties containerProperties = new Properties();
-		containerProperties.putAll(defaultProperties);
-		containerProperties.putAll(config);
+		final JsonNode containerProperties = ProfilesHelpers.merge(config.deepCopy(), defaultProperties);
 		reifyProject(target, profilesDir, containerProperties);
 	}
 
-	private void reifyProject(Path target, final Path profilesDir, Properties properties) throws IOException {
+	private void reifyProject(Path target, final Path profilesDir, JsonNode config) throws IOException {
 
-		if (properties.getProperty("artifactId") == null) {
-			properties.setProperty("artifactId", "acme-swarm-test");
+		final MavenConfigDTO mavenConfigDTO = toValue(config, MavenConfigDTO.class);
+		if (mavenConfigDTO.getGroupId() == null) {
+			mavenConfigDTO.setGroupId("org.acme.fabric8.swarm");
 		}
-		if (properties.getProperty("groupId") == null) {
-			properties.setProperty("groupId", "org.acme.fabric8.swarm");
+		if (mavenConfigDTO.getVersion() == null) {
+			mavenConfigDTO.setVersion(getProjectVersion());
 		}
-		if (properties.getProperty("version") == null) {
-			properties.setProperty("version", getProjectVersion());
-		}
-		if (properties.getProperty("description") == null) {
-			properties.setProperty("description", "");
+		if (mavenConfigDTO.getDescription() == null) {
+			mavenConfigDTO.setDescription("");
 		}
 
-		properties.setProperty("mainClass", properties.getProperty("groupId") + ".Main");
+		final ProjectPropertiesDTO projectPropertiesDTO = toValue(config, ProjectPropertiesDTO.class);
+		// set main class name
+		if (!projectPropertiesDTO.getProperties().containsKey(MAIN_CLASS_PROPERTY)) {
+			projectPropertiesDTO.setProperty(MAIN_CLASS_PROPERTY, mavenConfigDTO.getGroupId() + ".Main");
+		}
 
 		VelocityContext context = new VelocityContext();
-		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-			context.put(entry.getKey().toString(), entry.getValue());
+		// add container and maven config
+		context.put("maven", mavenConfigDTO);
+		context.put("container", toValue(config, ContainerConfigDTO.class));
+
+		// add generic project properties
+		for (Map.Entry<String, Object> entry : projectPropertiesDTO.getProperties().entrySet()) {
+			context.put(entry.getKey(), entry.getValue());
 		}
 
 		// read profile properties
 		loadProperties(context, profilesDir);
 
 		reifyPOM(target, context);
-		reifyMainJava(target, context, properties);
-		reifyStandaloneXML(target, context, profilesDir, properties);
+
+		reifyMainJava(target, context, mavenConfigDTO);
+		reifyStandaloneXML(target, context, profilesDir, mavenConfigDTO);
 	}
 
 	private void reifyPOM(Path target, VelocityContext context) throws IOException {
@@ -108,9 +123,8 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 		}
 	}
 
-	private void reifyMainJava(Path target, VelocityContext context, Properties properties) throws IOException {
-		String groupId = properties.getProperty("groupId");
-		Path packagePath = target.resolve("src/main/java/" + groupId.replace('.', '/'));
+	private void reifyMainJava(Path target, VelocityContext context, MavenConfigDTO mavenConfigDTO) throws IOException {
+		Path packagePath = target.resolve("src/main/java/" + mavenConfigDTO.getGroupId().replace('.', '/'));
 		File targetFile = new File(packagePath.toFile(), "Main.java");
 		targetFile.getParentFile().mkdirs();
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(targetFile))) {
@@ -120,15 +134,15 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 		}
 	}
 
-	private void reifyStandaloneXML(Path target, VelocityContext context, Path profilesDir, Properties properties) throws IOException {
-		String groupId = properties.getProperty("groupId");
-		Path packagePath = target.resolve("src/main/resources/" + groupId.replace('.', '/'));
+	private void reifyStandaloneXML(Path target, VelocityContext context, Path profilesDir, MavenConfigDTO mavenConfigDTO) throws IOException {
+		Path packagePath = target.resolve("src/main/resources/" + mavenConfigDTO.getGroupId().replace('.', '/'));
 
 		String targetFileName = "standalone.xml";
 		File targetFile = new File(packagePath.toFile(), targetFileName);
 		targetFile.getParentFile().mkdirs();
-		
-		YamlTransformer transformer = new YamlTransformer(defaultProperties);
+
+        ProjectPropertiesDTO projectPropertiesDTO = toValue(defaultProperties, ProjectPropertiesDTO.class);
+        YamlTransformer transformer = new YamlTransformer(projectPropertiesDTO.getProperties());
 		try (PrintWriter targetWriter = new PrintWriter(new FileWriter(targetFile))) {
 			
 			log.debug(String.format("Writing %s...", targetFile));
@@ -156,10 +170,6 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 			targetWriter.println("</profile>");
 			targetWriter.println("</server>");
 		}
-	}
-
-	private String getProjectVersion() {
-		return "1.0-SNAPSHOT";
 	}
 
 	private void loadProperties(VelocityContext context, Path profilesDir) throws IOException {

@@ -18,7 +18,8 @@ package io.fabric8.profiles.containers;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Reifies jenkins project resources, like jenkinsfile pipeline script.
@@ -29,12 +30,12 @@ public class JenkinsfileReifier extends ProjectReifier {
 
     private static final String JENKINSFILE = "Jenkinsfile";
 
-    public JenkinsfileReifier(Properties properties) {
-        super(properties);
+    public JenkinsfileReifier(JsonNode defaultConfig) {
+        super(defaultConfig);
     }
 
     @Override
-    public void reify(Path target, Properties config, Path profilesDir) throws IOException {
+    public void reify(Path target, JsonNode config, Path profilesDir) throws IOException {
         // copy Jenkinsfile to root dir in target
         Path jenkinsFile = profilesDir.resolve(JENKINSFILE);
         if (Files.notExists(jenkinsFile)) {

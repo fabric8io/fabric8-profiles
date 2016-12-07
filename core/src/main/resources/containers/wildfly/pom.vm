@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>$groupId</groupId>
-  <artifactId>$artifactId</artifactId>
+  <artifactId>$container.name</artifactId>
   <version>$version</version>
   
   <name>$name</name>
@@ -24,7 +24,7 @@
       <dependency>
         <groupId>org.wildfly.swarm</groupId>
         <artifactId>bom</artifactId>
-        <version>${version.wildfly.swarm}</version>
+        <version\$\{version.wildfly.swarm\}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -45,7 +45,7 @@
       <plugin>
         <groupId>org.wildfly.swarm</groupId>
         <artifactId>wildfly-swarm-plugin</artifactId>
-        <version>${version.wildfly.swarm}</version>
+        <version\$\{version.wildfly.swarm\}</version>
         <configuration>
           <jvmArguments>
             <jvmArgument>-Xmx128m</jvmArgument>
