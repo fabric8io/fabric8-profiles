@@ -45,7 +45,7 @@ public abstract class AbstractProfilesTest {
     @Deployment
 	@AddonDependencies( {
         @AddonDependency(name = "org.jboss.forge.addon:ui-test-harness", version="3.3.1.Final"),
-        @AddonDependency(name = "io.fabric8.profiles.forge:fabric8-profiles"),
+        @AddonDependency(name = "io.fabric8.profiles.forge:fabric8-profiles", version = "1.0-SNAPSHOT"),
         @AddonDependency(name = "org.jboss.forge.addon:maven", version="3.3.1.Final"),
         @AddonDependency(name = "org.jboss.forge.furnace.container:cdi", version="2.23.8.Final")
     })
