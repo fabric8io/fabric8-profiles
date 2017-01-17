@@ -1,3 +1,5 @@
+#!/usr/bin/groovy
+
 /**
  *  Copyright 2005-2016 Red Hat, Inc.
  *
@@ -13,21 +15,17 @@
  *  implied.  See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-node {
-  checkout scm
-  echo 'NOTE: running pipelines for the first time will take longer as build and base docker images are pulled onto the node'
-  kubernetes.pod('buildpod').withImage('fabric8/maven-builder')
-      .withPrivileged(true)
-      .withHostPathMount('/var/run/docker.sock','/var/run/docker.sock')
-      .withHostPathMount('/root/.mvnrepository','/var/lib/maven/repository')
-      .withEnvVar('DOCKER_CONFIG','/home/jenkins/.docker/')
-      .withSecret('jenkins-docker-cfg','/home/jenkins/.docker')
-      .withSecret('jenkins-maven-settings','/root/.m2')
-      .withServiceAccount('jenkins')
-      .inside {
 
-    stage 'Deploy'
-    // TODO: add a build parameter to pass the namespace
-    sh 'mvn -Pf8-local-deploy -Dfabric8.namespace=default'
-  }
+@Library('github.com/fabric8io/fabric8-pipeline-library@v2.2.309')
+
+utils = new io.fabric8.Utils()
+
+mavenNode {
+    checkout scm
+    echo 'NOTE: running pipelines for the first time will take longer as build and base docker images are pulled onto the node'
+    container(name: 'maven') {
+      stage 'Deploy'
+      // TODO: add a build parameter to pass the namespace
+      sh 'mvn -Pf8-local-deploy -Dfabric8.namespace=default'
+    }
 }
