@@ -57,7 +57,7 @@ public class ProjectSetup extends AbstractProfilesCommand {
 	private UIInput<String> version;
 
     @Inject
-    @WithAttributes(label = "Git Remote URI Pattern", required = true, defaultValue = "http://gogs.vagrant.f8/gogsadmin/${name}.git", description = "Git Remote URI Pattern for pushing Profiled Container projects")
+    @WithAttributes(label = "Git Remote URI Pattern", required = true, defaultValue = "http://gogs/gogsadmin/${name}.git", description = "Git Remote URI Pattern for pushing Profiled Container projects")
     private UIInput<String> gitRemoteUriPattern;
 
     @Inject

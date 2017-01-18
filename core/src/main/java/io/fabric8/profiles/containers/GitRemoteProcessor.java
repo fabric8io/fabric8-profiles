@@ -116,7 +116,7 @@ public class GitRemoteProcessor extends ProjectProcessor {
                 if (e.getCause() instanceof NoRemoteRepositoryException) {
                     final String address;
                     if (configDTO.getGogsServiceHost() == null) {
-                        address = "http://gogs.vagrant.f8";
+                        address = "http://gogs";
                     } else {
                         address = "http://" + configDTO.getGogsServiceHost();
                     }
