@@ -185,7 +185,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>fabric8-maven-plugin</artifactId>
-        <version>\${fabric8.version}</version>
+        <version>\${fabric8.maven.plugin.version}</version>
         <executions>
           <execution>
             <id>generate-resource</id>
