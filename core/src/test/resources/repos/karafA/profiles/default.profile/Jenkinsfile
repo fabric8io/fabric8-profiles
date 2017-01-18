@@ -24,8 +24,9 @@ mavenNode {
     checkout scm
     echo 'NOTE: running pipelines for the first time will take longer as build and base docker images are pulled onto the node'
     container(name: 'maven') {
+      stage 'Build'
+        sh 'mvn clean install'
       stage 'Deploy'
-      // TODO: add a build parameter to pass the namespace
-      sh 'mvn -Pf8-local-deploy -Dfabric8.namespace=default'
+        sh 'mvn fabric8:deploy'
     }
 }
