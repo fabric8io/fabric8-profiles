@@ -127,7 +127,7 @@ public class ContainersGeneratorMojo extends AbstractProfilesMojo {
         final Path target = Paths.get(targetDirectory.getAbsolutePath());
         try {
             final List<Path> names = Files.list(configs.resolve("containers"))
-                .filter(p -> p.getFileName().toString().endsWith(".cfg"))
+                .filter(p -> p.getFileName().toString().endsWith(".yaml"))
                 .collect(Collectors.toList());
 
             // generate all containers

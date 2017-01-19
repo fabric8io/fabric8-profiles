@@ -119,7 +119,7 @@ public class ContainersInstallerMojo extends AbstractProfilesMojo {
             // list all containers, and update under targetDirectory
             final Path target = Paths.get(targetDirectory.getAbsolutePath());
             final List<Path> names = Files.list(configs.resolve("containers"))
-                .filter(p -> p.getFileName().toString().endsWith(".cfg"))
+                .filter(p -> p.getFileName().toString().endsWith(".yaml"))
                 .collect(Collectors.toList());
 
             // TODO handle container deletes
