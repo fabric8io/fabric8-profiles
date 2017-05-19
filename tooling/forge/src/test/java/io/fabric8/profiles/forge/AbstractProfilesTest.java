@@ -50,6 +50,8 @@ public abstract class AbstractProfilesTest {
         @AddonDependency(name = "org.jboss.forge.addon:ui-test-harness", version="3.3.1.Final"),
         @AddonDependency(name = "io.fabric8.profiles.forge:fabric8-profiles", version = "1.0-SNAPSHOT"),
         @AddonDependency(name = "org.jboss.forge.addon:maven", version="3.3.1.Final"),
+        @AddonDependency(name = "org.jboss.forge.addon:convert", version="3.3.1.Final"),
+        @AddonDependency(name = "org.jboss.forge.addon:parser-yaml", version="3.3.1.Final"),
         @AddonDependency(name = "org.jboss.forge.furnace.container:cdi", version="2.23.8.Final")
     })
 	public static AddonArchive getDeployment() {

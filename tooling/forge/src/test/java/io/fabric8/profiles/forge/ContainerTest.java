@@ -25,10 +25,10 @@ import io.fabric8.profiles.forge.command.ContainerRemoveProfiles;
 import io.fabric8.profiles.forge.command.ProfileCreate;
 import io.fabric8.profiles.forge.command.ProfileDelete;
 import io.fabric8.profiles.forge.command.ProfileImport;
+import io.fabric8.profiles.forge.resource.YamlConfigResource;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.resource.DirectoryResource;
-import org.jboss.forge.addon.resource.FileResource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,7 +45,8 @@ public class ContainerTest extends AbstractProfilesTest {
 //            tester.setValueFor("containerTypes", "karaf jenkinsfile"));
             }, "Fabric8 PContainer has been installed.")
         .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").exists())
-        .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").reify(FileResource.class).getContents().contains("profiles: default"))
+        .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").reify(YamlConfigResource.class) != null)
+        .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("profiles: default"))
 
         .execute(ProfileCreate.class, tester -> {
             tester.setValueFor("name", "new-profile");

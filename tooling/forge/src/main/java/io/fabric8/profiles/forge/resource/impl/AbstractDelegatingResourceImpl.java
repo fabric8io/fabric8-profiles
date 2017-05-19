@@ -15,6 +15,7 @@
  */
 package io.fabric8.profiles.forge.resource.impl;
 
+import java.io.InputStream;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 
@@ -68,6 +69,17 @@ public abstract class AbstractDelegatingResourceImpl<R extends Resource<? extend
     @Override
     public boolean exists() {
         return getDelegate().exists();
+    }
+
+    @Override
+    public <R extends Resource<?>> R reify(Class<R> type) {
+        R res = super.reify(type);
+        return res != null ? res : getDelegate().reify(type);
+    }
+
+    @Override
+    public InputStream getResourceInputStream() {
+        return getDelegate().getResourceInputStream();
     }
 
     @Override
