@@ -45,7 +45,7 @@ public class ContainerTest extends AbstractProfilesTest {
 //            tester.setValueFor("containerTypes", "karaf jenkinsfile"));
             }, "Fabric8 PContainer has been installed.")
         .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").exists())
-        .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").reify(YamlConfigResource.class) != null)
+        .assertTrue(convert(project.getRoot().getChild("configs/containers/test-container.yaml"), YamlConfigResource.class) != null)
         .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("profiles: default"))
 
         .execute(ProfileCreate.class, tester -> {

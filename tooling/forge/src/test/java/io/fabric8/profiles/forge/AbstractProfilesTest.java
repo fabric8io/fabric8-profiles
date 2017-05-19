@@ -19,6 +19,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.forge.addon.convert.ConverterFactory;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ui.AbstractProjectCommand;
 import org.jboss.forge.addon.ui.controller.CommandController;
@@ -44,6 +45,9 @@ public abstract class AbstractProfilesTest {
 
     @Inject
     protected UITestHarness uiTestHarness;
+
+    @Inject
+    protected ConverterFactory converterFactory;
 
     @Deployment
 	@AddonDependencies( {
@@ -105,5 +109,9 @@ public abstract class AbstractProfilesTest {
             return this;
         }
     }
-}
 
+    protected <T, S> T convert(S source, final Class<T> target) {
+        return converterFactory.getConverter((Class<S>) source.getClass(), target).convert(source);
+    }
+
+}
