@@ -1,0 +1,22 @@
+# Settings for importing Fabric8 V1 profiles
+
+profileCommands:
+  -
+    name: "-(?<name>\\W)"
+    regExp: true
+    action: rename
+    replaceWith: "/${name}"
+    logLevel: INFO
+    logMessage: "Profile %s renamed, replacing '-' with '/'"
+  -
+    name: "fabric\\-ensemble\\-.*"
+    regExp: true
+    action: delete
+    logLevel: INFO
+    logMessage: "Profile %s ignored"
+
+resourceCommands:
+  -
+    name: "io.fabric8.agent.properties"
+    action: rename
+    replaceWith: "io.fabric8.profiles.properties"

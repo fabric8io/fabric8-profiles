@@ -29,6 +29,7 @@
   <description>Tooling for working with Fabric8 Profiles Project</description>
 
   <modules>
+    <module>api</module>
     <module>forge</module>
   </modules>
 

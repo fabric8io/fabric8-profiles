@@ -20,7 +20,6 @@ import javax.inject.Inject;
 
 import io.fabric8.profiles.config.ContainerConfigDTO;
 import io.fabric8.profiles.forge.resource.ProfileResource;
-
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.resource.DirectoryResource;
 import org.jboss.forge.addon.ui.context.UIBuilder;

@@ -23,7 +23,6 @@ import java.util.Optional;
 import io.fabric8.profiles.config.AbstractConfigDTO;
 import io.fabric8.profiles.forge.resource.YamlConfigResource;
 import io.fabric8.profiles.forge.resource.config.ConfigResource;
-
 import org.jboss.forge.addon.parser.yaml.resource.YamlResource;
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.addon.resource.ResourceFactory;

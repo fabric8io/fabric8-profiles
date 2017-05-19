@@ -19,7 +19,6 @@ import java.io.File;
 
 import io.fabric8.profiles.forge.resource.PContainerResource;
 import io.fabric8.profiles.forge.resource.YamlConfigResource;
-
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.addon.resource.ResourceFactory;
 import org.jboss.forge.addon.resource.ResourceGenerator;

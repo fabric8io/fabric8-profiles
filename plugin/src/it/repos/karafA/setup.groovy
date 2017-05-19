@@ -1,3 +1,4 @@
+package karafA
 /**
  *  Copyright 2005-2016 Red Hat, Inc.
  *

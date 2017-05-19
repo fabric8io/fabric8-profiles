@@ -24,7 +24,6 @@ import javax.inject.Inject;
 import io.fabric8.profiles.forge.ProfileUtils;
 import io.fabric8.profiles.forge.ResourceUtils;
 import io.fabric8.profiles.forge.resource.ProfileResource;
-
 import org.jboss.forge.addon.resource.DirectoryResource;
 import org.jboss.forge.addon.resource.FileResource;
 import org.jboss.forge.addon.resource.Resource;

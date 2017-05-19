@@ -18,7 +18,6 @@ package io.fabric8.profiles.forge.resource.impl.config;
 import io.fabric8.profiles.config.GitConfigDTO;
 import io.fabric8.profiles.forge.resource.PContainerResource;
 import io.fabric8.profiles.forge.resource.config.GitConfigResource;
-
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.addon.resource.ResourceFactory;
 

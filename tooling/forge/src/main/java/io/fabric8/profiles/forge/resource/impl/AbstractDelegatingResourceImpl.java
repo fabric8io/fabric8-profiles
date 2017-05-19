@@ -16,11 +16,9 @@
 package io.fabric8.profiles.forge.resource.impl;
 
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
 import io.fabric8.profiles.forge.resource.DelegatingResource;
-
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.addon.resource.ResourceFactory;
 import org.jboss.forge.addon.resource.VirtualResource;

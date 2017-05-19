@@ -26,7 +26,6 @@ import javax.inject.Inject;
 
 import io.fabric8.profiles.forge.ResourceUtils;
 import io.fabric8.profiles.forge.resource.YamlConfigResource;
-
 import org.jboss.forge.addon.parser.yaml.resource.YamlResource;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.resource.DirectoryResource;

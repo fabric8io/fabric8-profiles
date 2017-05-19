@@ -24,25 +24,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.profiles.Profiles;
 import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.profiles.config.ContainerConfigDTO;
-import io.fabric8.profiles.containers.karaf.KarafProjectReifier;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import static io.fabric8.profiles.config.ConfigHelper.fromValue;
 import static io.fabric8.profiles.config.ConfigHelper.toValue;
+import static io.fabric8.profiles.containers.Constants.CONTAINERS;
+import static io.fabric8.profiles.containers.Constants.CONTAINER_FIELD;
+import static io.fabric8.profiles.containers.Constants.DEFAULT_CONTAINER_TYPE;
 
 /**
  * Utility class for reading container configurations and generating containers.
  */
 public class Containers {
-
-    private static final String DEFAULT_CONTAINER_TYPE =
-        KarafProjectReifier.CONTAINER_TYPE + " " + JenkinsfileReifier.CONTAINER_TYPE;
-
-    private static final String CONTAINERS = "containers/%s.yaml";
-    private static final String CONTAINER_FIELD = "container";
 
     private final Path repository;
     private final Profiles profiles;

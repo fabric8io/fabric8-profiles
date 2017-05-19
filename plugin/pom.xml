@@ -40,6 +40,16 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>io.fabric8.profiles.platforms</groupId>
+      <artifactId>fabric8-profiles-karaf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.fabric8.profiles.platforms</groupId>
+      <artifactId>fabric8-profiles-wildfly</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
     </dependency>
@@ -89,13 +99,16 @@
     <!-- copy test repo data for unit and integration tests -->
     <testResources>
       <testResource>
-        <directory>../core/src/test/resources/repos</directory>
+        <directory>../platforms/karaf/src/test/resources/repos</directory>
+        <targetPath>${project.build.directory}/it/repos</targetPath>
+      </testResource>
+      <testResource>
+        <directory>../platforms/wildfly/src/test/resources/repos</directory>
         <targetPath>${project.build.directory}/it/repos</targetPath>
       </testResource>
       <testResource>
         <directory>src/it/repos</directory>
         <targetPath>${project.build.directory}/it/repos</targetPath>
-        <filtering>true</filtering>
       </testResource>
     </testResources>
 

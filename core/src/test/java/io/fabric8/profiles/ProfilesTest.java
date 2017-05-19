@@ -20,10 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import static io.fabric8.profiles.ProfilesHelpers.deleteDirectory;
 import static io.fabric8.profiles.ProfilesHelpers.readPropertiesFile;

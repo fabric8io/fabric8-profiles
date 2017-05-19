@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import io.fabric8.profiles.Profiles;
 import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.profiles.config.ConfigHelper;
@@ -33,13 +32,14 @@ import io.fabric8.profiles.containers.Containers;
 import io.fabric8.profiles.containers.JenkinsfileReifier;
 import io.fabric8.profiles.containers.ProjectReifier;
 import io.fabric8.profiles.containers.karaf.KarafProjectReifier;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Generates all containers, run on updates to the Profiles repository.

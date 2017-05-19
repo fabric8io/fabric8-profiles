@@ -1,0 +1,4 @@
+kind: ConfigMap
+metadata:
+  # Must match the 'spring.application.name' property of the application
+  name: camelB-config

@@ -20,7 +20,6 @@ import java.util.List;
 
 import io.fabric8.profiles.forge.resource.PContainerResource;
 import io.fabric8.profiles.forge.resource.config.ListConfigResource;
-
 import org.jboss.forge.addon.parser.yaml.resource.YamlResource;
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.addon.resource.ResourceFactory;

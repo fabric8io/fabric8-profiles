@@ -18,9 +18,8 @@ package io.fabric8.maven.profiles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.profiles.PluginTestHelpers;
-
+import io.fabric8.profiles.ProfilesHelpers;
 import org.codehaus.plexus.PlexusTestCase;
 import org.eclipse.jgit.api.Git;
 import org.junit.Ignore;

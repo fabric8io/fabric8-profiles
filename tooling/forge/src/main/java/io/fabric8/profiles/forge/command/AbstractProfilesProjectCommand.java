@@ -23,7 +23,6 @@ import io.fabric8.profiles.forge.completer.PContainerCompleter;
 import io.fabric8.profiles.forge.completer.ProfileCompleter;
 import io.fabric8.profiles.forge.converter.PContainerResourceConverter;
 import io.fabric8.profiles.forge.converter.ProfileResourceConverter;
-
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.ui.context.UIContext;
 

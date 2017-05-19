@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 import io.fabric8.profiles.containers.Containers;
-
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;

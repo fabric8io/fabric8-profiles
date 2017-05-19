@@ -23,12 +23,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import io.fabric8.profiles.Profiles;
 import io.fabric8.profiles.ProfilesHelpers;
+import io.fabric8.profiles.containers.Constants;
 import io.fabric8.profiles.forge.ProfileUtils;
 import io.fabric8.profiles.forge.ResourceUtils;
 import io.fabric8.profiles.forge.resource.ProfileResource;
-
 import org.jboss.forge.addon.resource.DirectoryResource;
 import org.jboss.forge.addon.resource.FileResource;
 import org.jboss.forge.addon.resource.Resource;
@@ -73,7 +72,7 @@ public class ProfileResourceImpl extends AbstractDelegatingResourceImpl<Director
     @Override
     public Iterable<ProfileResource> getParentProfiles() {
         Properties properties = getAgentProperties();
-        String[] parentNames = properties.getProperty(Profiles.ATTRIBUTE_PARENTS).split(" ");
+        String[] parentNames = properties.getProperty(Constants.ATTRIBUTE_PARENTS).split(" ");
 
         List<ProfileResource> result = new LinkedList<>();
         DirectoryResource rootDir = getProfilesDir().getParent();
@@ -107,7 +106,7 @@ public class ProfileResourceImpl extends AbstractDelegatingResourceImpl<Director
             throw new ResourceException(e.getMessage(), e);
         }
         if (parents != null && parents.iterator().hasNext()) {
-            properties.setProperty(Profiles.ATTRIBUTE_PARENTS, profileUtils.getProfileNameList(parents));
+            properties.setProperty(Constants.ATTRIBUTE_PARENTS, profileUtils.getProfileNameList(parents));
         }
         StringWriter writer = new StringWriter();
         try {
@@ -138,7 +137,7 @@ public class ProfileResourceImpl extends AbstractDelegatingResourceImpl<Director
     }
 
     private FileResource getAgentPropertiesFile() {
-        FileResource resource = getChild(Profiles.FABRIC8_AGENT_PROPERTIES).reify(FileResource.class);
+        FileResource resource = getChild(Constants.FABRIC8_AGENT_PROPERTIES).reify(FileResource.class);
         if (!resource.exists()) {
             resource.createNewFile();
         }

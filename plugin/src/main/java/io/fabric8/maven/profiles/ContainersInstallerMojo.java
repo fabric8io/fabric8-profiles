@@ -24,13 +24,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.profiles.config.ConfigHelper;
 import io.fabric8.profiles.containers.GitRemoteProcessor;
 import io.fabric8.profiles.containers.ProjectProcessor;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -42,6 +39,9 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * After all containers are generated, push generated container source to Git repos.

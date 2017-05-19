@@ -67,6 +67,7 @@
 
   <modules>
     <module>core</module>
+    <module>platforms</module>
     <module>plugin</module>
     <module>tooling</module>
   </modules>
@@ -194,6 +195,12 @@
   </dependencyManagement>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>

@@ -94,6 +94,11 @@
       <artifactId>fabric8-profiles-core</artifactId>
       <version>${fabric8-profiles-core.version}</version>
     </dependency>
+  <dependency>
+      <groupId>io.fabric8.profiles.forge</groupId>
+      <artifactId>fabric8-profiles-api</artifactId>
+      <version>${fabric8-profiles-core.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>core</artifactId>

@@ -2,9 +2,8 @@ package io.fabric8.profiles.forge;
 
 import javax.inject.Inject;
 
-import io.fabric8.profiles.Profiles;
+import io.fabric8.profiles.containers.Constants;
 import io.fabric8.profiles.forge.command.ProjectSetup;
-
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.forge.addon.dependencies.builder.CoordinateBuilder;
 import org.jboss.forge.addon.maven.plugins.MavenPlugin;
@@ -39,6 +38,6 @@ public class ProjectSetupTest extends AbstractProfilesTest {
         assertTrue(projectRoot.getChild("fabric8-profiles.yaml").exists());
         assertTrue(projectRoot.getChild("configs/containers").exists());
         assertTrue(projectRoot.getChild("profiles/default.profile").exists());
-        assertTrue(projectRoot.getChild("profiles/default.profile/" + Profiles.FABRIC8_AGENT_PROPERTIES).exists());
+        assertTrue(projectRoot.getChild("profiles/default.profile/" + Constants.FABRIC8_AGENT_PROPERTIES).exists());
 	}
 }

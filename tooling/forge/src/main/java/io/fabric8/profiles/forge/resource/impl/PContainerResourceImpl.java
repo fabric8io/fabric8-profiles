@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import io.fabric8.profiles.config.ContainerConfigDTO;
@@ -32,7 +31,6 @@ import io.fabric8.profiles.forge.resource.PContainerResource;
 import io.fabric8.profiles.forge.resource.ProfileResource;
 import io.fabric8.profiles.forge.resource.YamlConfigResource;
 import io.fabric8.profiles.forge.resource.config.ContainerConfigResource;
-
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.addon.resource.ResourceFactory;
 

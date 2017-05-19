@@ -26,7 +26,6 @@ import io.fabric8.profiles.config.MavenConfigDTO;
 import io.fabric8.profiles.forge.ProfileUtils;
 import io.fabric8.profiles.forge.ResourceUtils;
 import io.fabric8.profiles.forge.resource.YamlConfigResource;
-
 import org.apache.maven.model.Model;
 import org.jboss.forge.addon.dependencies.builder.CoordinateBuilder;
 import org.jboss.forge.addon.facets.FacetFactory;

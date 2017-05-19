@@ -18,7 +18,6 @@ package io.fabric8.profiles.forge.command;
 import javax.inject.Inject;
 
 import io.fabric8.profiles.forge.resource.PContainerResource;
-
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.input.UIInput;

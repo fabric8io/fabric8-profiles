@@ -19,12 +19,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 
-import org.codehaus.plexus.PlexusTestCase;
-import org.junit.Test;
-
 import io.fabric8.profiles.PluginTestHelpers;
 import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.profiles.containers.wildfly.WildFlyProjectReifier;
+import org.codehaus.plexus.PlexusTestCase;
+import org.junit.Test;
 
 /**
  * Test container generation using Mojo.

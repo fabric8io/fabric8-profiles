@@ -3,7 +3,6 @@ package io.fabric8.profiles.forge.command;
 import javax.inject.Inject;
 
 import io.fabric8.profiles.forge.resource.ProfileResource;
-
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIContext;
@@ -11,10 +10,10 @@ import org.jboss.forge.addon.ui.context.UIExecutionContext;
 import org.jboss.forge.addon.ui.input.UISelectMany;
 import org.jboss.forge.addon.ui.metadata.UICommandMetadata;
 import org.jboss.forge.addon.ui.metadata.WithAttributes;
-import org.jboss.forge.addon.ui.util.Metadata;
-import org.jboss.forge.addon.ui.util.Categories;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
+import org.jboss.forge.addon.ui.util.Categories;
+import org.jboss.forge.addon.ui.util.Metadata;
 
 public class ProfileChangeParents extends AbstractProfileCommand {
 

@@ -17,8 +17,7 @@ package io.fabric8.profiles.forge;
 
 import javax.inject.Inject;
 
-import io.fabric8.profiles.Profiles;
-
+import io.fabric8.profiles.containers.Constants;
 import org.jboss.forge.addon.dependencies.builder.CoordinateBuilder;
 import org.jboss.forge.addon.maven.plugins.MavenPluginBuilder;
 import org.jboss.forge.addon.maven.plugins.MavenPluginInstaller;
@@ -60,7 +59,7 @@ public class ProjectHelper {
         Resource<?> root = project.getRoot();
         FileResource<?> defaultProfile = root.getChild("profiles/default.profile").reify(FileResource.class);
         defaultProfile.mkdirs();
-        FileResource<?> agentProps = root.getChild("profiles/default.profile/" + Profiles.FABRIC8_AGENT_PROPERTIES).reify(FileResource.class);
+        FileResource<?> agentProps = root.getChild("profiles/default.profile/" + Constants.FABRIC8_AGENT_PROPERTIES).reify(FileResource.class);
         agentProps.createNewFile();
 
         return refreshProject(project);

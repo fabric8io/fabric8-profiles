@@ -20,12 +20,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.Log4JLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Reifies projects using <a href="https://velocity.apache.org/">Apache Velocity Engine</a>.

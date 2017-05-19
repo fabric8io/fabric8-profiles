@@ -39,7 +39,6 @@ import io.fabric8.profiles.forge.resource.impl.config.ListConfigResourceImpl;
 import io.fabric8.profiles.forge.resource.impl.config.MavenConfigResourceImpl;
 import io.fabric8.profiles.forge.resource.impl.config.ProfilesConfigResourceImpl;
 import io.fabric8.profiles.forge.resource.impl.config.ProjectPropertiesResourceImpl;
-
 import org.jboss.forge.addon.parser.yaml.resource.AbstractYamlResource;
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.addon.resource.ResourceFactory;

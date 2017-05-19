@@ -21,13 +21,14 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.fabric8.profiles.ProfilesHelpers;
+
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.fabric8.profiles.ProfilesHelpers;
 
 import static io.fabric8.profiles.ProfilesHelpers.YAML_MAPPER;
 

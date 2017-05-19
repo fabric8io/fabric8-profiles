@@ -24,14 +24,12 @@ import java.util.Properties;
 
 import io.fabric8.devops.ProjectConfig;
 import io.fabric8.devops.connector.DevOpsConnector;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.fabric8.profiles.ProfilesHelpers;
 import io.fabric8.profiles.config.ConfigHelper;
 import io.fabric8.profiles.config.GitConfigDTO;
 import io.fabric8.repo.git.CreateRepositoryDTO;
 import io.fabric8.repo.git.GitRepoClient;
 import io.fabric8.repo.git.RepositoryDTO;
-
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RemoteAddCommand;
@@ -45,6 +43,8 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Pushes a reified container to a remote git repo.

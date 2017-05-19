@@ -19,7 +19,6 @@ import javax.inject.Inject;
 
 import io.fabric8.profiles.forge.ContainerUtils;
 import io.fabric8.profiles.forge.resource.PContainerResource;
-
 import org.jboss.forge.addon.convert.Converter;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.resource.DirectoryResource;

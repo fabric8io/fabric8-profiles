@@ -24,15 +24,13 @@ import io.fabric8.profiles.forge.command.ContainerDelete;
 import io.fabric8.profiles.forge.command.ContainerRemoveProfiles;
 import io.fabric8.profiles.forge.command.ProfileCreate;
 import io.fabric8.profiles.forge.command.ProfileDelete;
-
+import io.fabric8.profiles.forge.command.ProfileImport;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.resource.DirectoryResource;
+import org.jboss.forge.addon.resource.FileResource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
 public class ContainerTest extends AbstractProfilesTest {
@@ -40,47 +38,53 @@ public class ContainerTest extends AbstractProfilesTest {
     @Test
 	public void testAddon() throws Exception {
         Project project = projectHelper.createProfilesProject();
-        project = executeCommand(project, ContainerCreate.class, tester -> {
+        new CommandTest(project)
+        .execute(ContainerCreate.class, tester -> {
             tester.setValueFor("name", "test-container");
 //            tester1.setValueFor("profiles", "default");
 //            tester.setValueFor("containerTypes", "karaf jenkinsfile"));
-        }, "Fabric8 PContainer has been installed.");
-        assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").exists());
-        assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("profiles: default"));
+            }, "Fabric8 PContainer has been installed.")
+        .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").exists())
+        .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").reify(FileResource.class).getContents().contains("profiles: default"))
 
-        project = executeCommand(project, ProfileCreate.class, tester -> {
+        .execute(ProfileCreate.class, tester -> {
             tester.setValueFor("name", "new-profile");
-        }, "Fabric8 Profile successfully created.");
-        assertTrue(new File(project.getRoot().reify(DirectoryResource.class).getUnderlyingResourceObject(), "profiles/new/profile.profile").isDirectory());
+        }, "Fabric8 Profile successfully created.")
+        .assertTrue(new File(project.getRoot().reify(DirectoryResource.class).getUnderlyingResourceObject(), "profiles/new/profile.profile").isDirectory())
 
-        project = executeCommand(project, ContainerAddProfiles.class, tester -> {
+        .execute(ContainerAddProfiles.class, tester -> {
             tester.setValueFor("container", "test-container");
             tester.setValueFor("profiles", "new-profile");
-        }, "Fabric8 Profiles successfully added.");
-        assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("profiles: default new-profile"));
+        }, "Fabric8 Profiles successfully added.")
+        .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("profiles: default new-profile"))
 
-        project = executeCommand(project, ContainerRemoveProfiles.class, tester -> {
+        .execute(ContainerRemoveProfiles.class, tester -> {
             tester.setValueFor("container", "test-container");
             tester.setValueFor("profiles", "default");
-        }, "Fabric8 Profiles successfully removed.");
-        assertFalse(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("default"));
+        }, "Fabric8 Profiles successfully removed.")
+        .assertFalse(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("default"))
 
-        project = executeCommand(project, ContainerChangeProfiles.class, tester -> {
+        .execute(ContainerChangeProfiles.class, tester -> {
             tester.setValueFor("container", "test-container");
             tester.setValueFor("profiles", "default");
-        }, "Fabric8 Profiles successfully changed.");
-        assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("default"));
-        assertFalse(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("new-profile"));
+        }, "Fabric8 Profiles successfully changed.")
+        .assertTrue(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("default"))
+        .assertFalse(project.getRoot().getChild("configs/containers/test-container.yaml").getContents().contains("new-profile"))
 
-        project = executeCommand(project, ContainerDelete.class, tester -> {
+        .execute(ContainerDelete.class, tester -> {
             tester.setValueFor("container", "test-container");
-        }, "Fabric8 PContainer successfully deleted.");
-        assertFalse(project.getRoot().getChild("configs/containers/test-container.yaml").exists());
+        }, "Fabric8 PContainer successfully deleted.")
+        .assertFalse(project.getRoot().getChild("configs/containers/test-container.yaml").exists())
 
-        project = executeCommand(project, ProfileDelete.class, tester -> {
+        .execute(ProfileDelete.class, tester -> {
             tester.setValueFor("profile", "new-profile");
-        }, "Fabric8 Profile successfully deleted.");
-        assertFalse(project.getRoot().getChild("profiles/new/profile.profile").exists());
+        }, "Fabric8 Profile successfully deleted.")
+        .assertFalse(project.getRoot().getChild("profiles/new/profile.profile").exists())
+
+        .execute(ProfileImport.class, tester -> {
+            tester.setValueFor("profileDataDir", "target/test-classes/repos/karafA/profiles");
+        }, "Successfully imported 132 profiles with 481 resources!")
+        .assertTrue(project.getRoot().getChild("profiles/autoscale.profile/io.fabric8.profiles.properties").exists());
 	}
 
 }

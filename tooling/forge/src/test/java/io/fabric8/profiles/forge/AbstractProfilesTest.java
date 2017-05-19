@@ -15,18 +15,21 @@
  */
 package io.fabric8.profiles.forge;
 
+import java.util.List;
 import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ui.AbstractProjectCommand;
 import org.jboss.forge.addon.ui.controller.CommandController;
+import org.jboss.forge.addon.ui.result.CompositeResult;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.test.UITestHarness;
 import org.jboss.forge.arquillian.AddonDependencies;
 import org.jboss.forge.arquillian.AddonDependency;
 import org.jboss.forge.arquillian.archive.AddonArchive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.junit.Assert;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -64,7 +67,12 @@ public abstract class AbstractProfilesTest {
             assertTrue(tester.isValid());
 
             Result result = tester.execute();
-            assertEquals(success, result.getMessage());
+            if (result instanceof CompositeResult) {
+                List<Result> results = ((CompositeResult) result).getResults();
+                assertEquals(success, results.get(results.size() - 1).getMessage());
+            } else {
+                assertEquals(success, result.getMessage());
+            }
         }
         return projectHelper.refreshProject(project);
     }
@@ -72,4 +80,28 @@ public abstract class AbstractProfilesTest {
     protected interface CommandInit {
         void init(CommandController tester);
     }
+
+    protected class CommandTest {
+        private Project project;
+
+        public CommandTest(Project project) {
+            this.project = project;
+        }
+
+        public CommandTest execute(Class<? extends AbstractProjectCommand> commandClass, AbstractProfilesTest.CommandInit commandInit, String success) throws Exception {
+            project = executeCommand(project, commandClass, commandInit, success);
+            return this;
+        }
+
+        public CommandTest assertTrue(boolean condition) {
+            Assert.assertTrue(condition);
+            return this;
+        }
+
+        public CommandTest assertFalse(boolean condition) {
+            Assert.assertFalse(condition);
+            return this;
+        }
+    }
 }
+
