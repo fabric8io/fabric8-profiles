@@ -15,15 +15,20 @@
  */
 package io.fabric8.profiles.containers;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.Log4JLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -32,9 +37,10 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public abstract class VelocityBasedReifier extends ProjectReifier {
 
-    protected final VelocityEngine engine;
+    private static final String USER_DEFINED_POM_VM = "pom.vm";
+    private final Properties velocityProperties;
 
-    /**
+	/**
      * Configures reifier with default configuration and a velocity engine.
      * @param defaultConfig default configuration values.
      */
@@ -42,14 +48,23 @@ public abstract class VelocityBasedReifier extends ProjectReifier {
         super(defaultConfig);
 
         // initialize velocity to load resources from class loader and use Log4J
-        Properties velocityProperties = new Properties();
+        velocityProperties = new Properties();
         velocityProperties.setProperty(RuntimeConstants.RESOURCE_LOADER, "cloader");
         velocityProperties.setProperty("cloader.resource.loader.class", ClasspathResourceLoader.class.getName());
         velocityProperties.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, Log4JLogChute.class.getName());
         velocityProperties.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM + ".log4j.logger", log.getName());
-        engine = new VelocityEngine(velocityProperties);
-        engine.init();
     }
+
+	protected VelocityEngine getEngine(Properties properties) {
+    	Properties props = new Properties();
+    	props.putAll(velocityProperties);
+    	if (properties != null) {
+            props.putAll(properties);
+        }
+		VelocityEngine engine = new VelocityEngine(props);
+		engine.init();
+		return engine;
+	}
 
 	protected Set<String> getPrefixedProperty(Properties props, String featurePrefix) {
 	    return getPrefixedProperty(props, featurePrefix, null);
@@ -77,5 +92,22 @@ public abstract class VelocityBasedReifier extends ProjectReifier {
     protected String getProjectVersion() {
         // TODO: perhaps use the git hash?
         return "1.0-SNAPSHOT";
+    }
+
+    protected Template getTemplate(Path templatesDir, java.util.function.Supplier<String> templateName) throws IOException {
+        final Template pomTemplate;
+        if (Files.exists(templatesDir.resolve(USER_DEFINED_POM_VM))) {
+
+            // user defined template in profile
+            Properties filePathProps = new Properties();
+            filePathProps.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
+            filePathProps.setProperty("file.resource.loader.class", FileResourceLoader.class.getName());
+            filePathProps.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, templatesDir.toAbsolutePath().toString());
+            pomTemplate = getEngine(filePathProps).getTemplate(USER_DEFINED_POM_VM);
+
+        } else {
+            pomTemplate = getEngine(null).getTemplate(templateName.get());
+        }
+        return pomTemplate;
     }
 }

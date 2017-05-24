@@ -53,6 +53,7 @@ import static io.fabric8.profiles.config.ConfigHelper.toValue;
 public class KarafProjectReifier extends VelocityBasedReifier {
 
     private static final String KARAF_POM_VM = "/containers/karaf/pom.vm";
+    private static final String KARAF2_POM_VM = "/containers/karaf2/pom.vm";
 
     private static final String REPOSITORY_PREFIX = "repository.";
     private static final String FEATURE_PREFIX = "feature.";
@@ -79,11 +80,11 @@ public class KarafProjectReifier extends VelocityBasedReifier {
     }
 
     private void reifyProject(Path target, final Path profilesDir, JsonNode config) throws IOException {
-        final File pojoFile = new File(target.toFile(), "pom.xml");
+        final File pomFile = new File(target.toFile(), "pom.xml");
         BufferedWriter writer = null;
 
         try {
-            writer = new BufferedWriter(new FileWriter(pojoFile));
+            writer = new BufferedWriter(new FileWriter(pomFile));
 
             final MavenConfigDTO mavenConfigDTO = toValue(config, MavenConfigDTO.class);
             if (mavenConfigDTO.getGroupId() == null) {
@@ -110,11 +111,41 @@ public class KarafProjectReifier extends VelocityBasedReifier {
             // read profile properties
             loadProperties(context, profilesDir);
 
-            log.debug(String.format("Writing %s...", pojoFile));
-            Template pojoTemplate = engine.getTemplate(KARAF_POM_VM);
-            pojoTemplate.merge(context, writer);
+            log.debug(String.format("Writing %s...", pomFile));
 
-            // close pojoFile
+            // select template to use
+            final Template pomTemplate = getTemplate(profilesDir, () -> {
+                // read fabric8 properties to get Karaf version
+                Path versionPropsFile = profilesDir.resolve(Constants.FABRIC8_VERSION_PROPERTIES);
+                final Properties versionProps;
+                if (Files.exists(versionPropsFile)) {
+                    try {
+                        versionProps = ProfilesHelpers.readPropertiesFile(versionPropsFile);
+                    } catch (IOException e) {
+                        throw new IllegalArgumentException(e);
+                    }
+                } else {
+                    versionProps = new Properties();
+                }
+
+                String karafVersion = versionProps.getProperty("karaf");
+                final String templateName;
+                if (karafVersion == null || karafVersion.startsWith("4.")) {
+                    // Karaf4 template
+                    templateName = KARAF_POM_VM;
+                } else if (karafVersion.startsWith("2.")) {
+                    // karaf2 template
+                    templateName = KARAF2_POM_VM;
+                } else {
+                    throw new IllegalArgumentException("Provide user defined pom.vm template for unsupported Karaf version " + karafVersion);
+                }
+                return templateName;
+            });
+
+            // merge template and write pom.xml
+            pomTemplate.merge(context, writer);
+
+            // close pomFile
             writer.close();
 
             // add other resource files under src/main/resources/assembly

@@ -32,7 +32,11 @@ public interface Constants {
     String CONTAINER_FIELD = "container";
 
     String DEFAULT_PROFILE = "default";
+
     String FABRIC8_AGENT_PROPERTIES = "io.fabric8.agent.properties";
+    String FABRIC8_VERSION_PROPERTIES = "io.fabric8.version.properties";
+
     String ATTRIBUTE_PARENTS = "attribute.parents";
     Pattern ATTRIBUTE_PARENTS_PATTERN = Pattern.compile(ATTRIBUTE_PARENTS + "\\s*=\\s*(.+)$");
+
 }

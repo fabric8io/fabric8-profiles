@@ -104,7 +104,7 @@ public class ResourcesProjectReifier extends VelocityBasedReifier {
             loadProperties(context, profilesDir);
 
             log.debug(String.format("Writing %s...", pojoFile));
-            Template pojoTemplate = engine.getTemplate(RESOURCES_POM_VM);
+            Template pojoTemplate = getTemplate(profilesDir, () -> { return RESOURCES_POM_VM; });
             pojoTemplate.merge(context, writer);
 
             // close pojoFile

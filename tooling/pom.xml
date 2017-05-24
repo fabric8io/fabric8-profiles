@@ -30,7 +30,9 @@
 
   <modules>
     <module>api</module>
-    <module>forge</module>
+    <module>impl</module>
+    <module>addon</module>
+    <module>tests</module>
   </modules>
 
 </project>

@@ -37,8 +37,6 @@
 
     <!-- maven plugin versions -->
     <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
-    <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
     <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
     <fabric8.maven.plugin.version>3.2.13</fabric8.maven.plugin.version>
   </properties>
@@ -49,7 +47,7 @@
       <dependency>
         <groupId>io.fabric8</groupId>
         <artifactId>fabric8-project-bom-with-platform-deps</artifactId>
-        <version>\${fabric8.version}</version>
+        <version>\$\{fabric8.version\}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -108,13 +106,6 @@
           <source>1.8</source>
           <target>1.8</target>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>\${maven-bundle-plugin.version}</version>
-        <extensions>true</extensions>
       </plugin>
 
       <!-- karaf-maven-plugin creates custom microservice distribution -->

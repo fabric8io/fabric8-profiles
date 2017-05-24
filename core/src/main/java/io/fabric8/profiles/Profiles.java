@@ -90,11 +90,11 @@ public class Profiles {
 
         // resolve Fabric8 URLs
         final Properties versionProperties;
-        final Path versionFile = target.resolve("io.fabric8.version.properties");
+        final Path versionFile = target.resolve(Constants.FABRIC8_VERSION_PROPERTIES);
         if (Files.exists(versionFile)) {
             versionProperties = readPropertiesFile(versionFile);
         } else {
-            LOG.warn("Missing io.fabric8.version.properties");
+            LOG.warn("Missing " + Constants.FABRIC8_VERSION_PROPERTIES);
             versionProperties = new Properties();
         }
         Files.walkFileTree(target, new SimpleFileVisitor<Path>() {

@@ -15,7 +15,8 @@
   ~  permissions and limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -26,7 +27,7 @@
 
   <artifactId>fabric8-profiles-api</artifactId>
   <groupId>io.fabric8.profiles.forge</groupId>
-  <name>Fabric8 Profiles :: JBoss Forge Addon APIs</name>
+  <name>Fabric8 Profiles :: Tooling :: JBoss Forge Addon APIs</name>
   <version>1.0-SNAPSHOT</version>
 
   <properties>
@@ -35,79 +36,72 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.forge>3.3.1.Final</version.forge>
-    <fabric8-profiles-core.version>1.0-SNAPSHOT</fabric8-profiles-core.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>io.fabric8.profiles</groupId>
       <artifactId>fabric8-profiles-core</artifactId>
-      <version>${fabric8-profiles-core.version}</version>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.forge.furnace.container</groupId>
+      <artifactId>cdi-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>core</artifactId>
       <classifier>forge-addon</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.forge.addon</groupId>
+      <artifactId>resources</artifactId>
+      <classifier>forge-addon</classifier>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>ui</artifactId>
       <classifier>forge-addon</classifier>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>facets</artifactId>
       <classifier>forge-addon</classifier>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>projects</artifactId>
       <classifier>forge-addon</classifier>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>maven</artifactId>
       <classifier>forge-addon</classifier>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>convert</artifactId>
       <classifier>forge-addon</classifier>
+      <scope>provided</scope>
     </dependency>
+<!--
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>parser-yaml</artifactId>
       <classifier>forge-addon</classifier>
+      <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.jboss.forge.furnace.container</groupId>
-      <artifactId>cdi</artifactId>
-      <classifier>forge-addon</classifier>
-    </dependency>
+-->
 
-    <!-- Testing -->
-    <dependency>
-      <groupId>org.jboss.forge.addon</groupId>
-      <artifactId>ui-test-harness</artifactId>
-      <classifier>forge-addon</classifier>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.forge.furnace.test</groupId>
-      <artifactId>furnace-test-harness</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.forge.furnace.test</groupId>
-      <artifactId>arquillian-furnace-classpath</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${version.slf4j}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <dependencyManagement>
@@ -119,15 +113,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-<!--
-      <dependency>
-        <groupId>org.jboss.spec</groupId>
-        <artifactId>jboss-javaee-6.0</artifactId>
-        <version>3.0.3.Final</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
--->
     </dependencies>
   </dependencyManagement>
 

@@ -38,6 +38,7 @@ import io.fabric8.profiles.config.ProjectPropertiesDTO;
 import io.fabric8.profiles.containers.VelocityBasedReifier;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
@@ -65,8 +66,12 @@ public class WildFlyProjectReifier extends VelocityBasedReifier {
 	private static final String SWARM_FRACTION_PROPERTIES = "fraction.properties";
 	private static final String MAIN_CLASS_PROPERTY = "mainClass";
 
+	private final VelocityEngine engine;
+
 	public WildFlyProjectReifier(JsonNode defaultConfig) {
 		super(defaultConfig);
+
+		engine = getEngine(null);
 	}
 
 	@Override
