@@ -20,14 +20,14 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import io.fabric8.profiles.forge.resource.DelegatingResource;
+import org.jboss.forge.addon.resource.AbstractResource;
 import org.jboss.forge.addon.resource.Resource;
 import org.jboss.forge.addon.resource.ResourceFactory;
-import org.jboss.forge.addon.resource.VirtualResource;
 
 /**
  * Abstract base class for implementations of {@link DelegatingResource}.
  */
-public abstract class AbstractDelegatingResourceImpl<R extends Resource<? extends T>, T> extends VirtualResource<T> implements DelegatingResource<R, T> {
+public abstract class AbstractDelegatingResourceImpl<R extends Resource<? extends T>, T> extends AbstractResource<T> implements DelegatingResource<R, T> {
 
     private final R delegate;
 
