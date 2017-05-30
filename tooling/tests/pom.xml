@@ -137,6 +137,7 @@
       <groupId>org.jboss.forge.furnace.container</groupId>
       <artifactId>cdi</artifactId>
       <classifier>forge-addon</classifier>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

@@ -58,7 +58,7 @@ public abstract class AbstractProfilesTest {
         @AddonDependency(name = "org.jboss.forge.addon:maven", version="3.3.1.Final"),
         @AddonDependency(name = "org.jboss.forge.addon:convert", version="3.3.1.Final"),
         @AddonDependency(name = "org.jboss.forge.addon:parser-yaml", version="3.3.1.Final"),
-        @AddonDependency(name = "org.jboss.forge.furnace.container:cdi")
+        @AddonDependency(name = "org.jboss.forge.furnace.container:cdi", version = "2.23.8.Final")
     })
 	public static AddonArchive getDeployment() {
 		return ShrinkWrap.create(AddonArchive.class)
