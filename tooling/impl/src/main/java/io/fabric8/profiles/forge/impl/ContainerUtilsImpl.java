@@ -64,7 +64,12 @@ public class ContainerUtilsImpl implements ContainerUtils {
     }
 
     @Override
-    public List<PContainerResource> getContainers(DirectoryResource rootDir, String value) {
+    public List<PContainerResource> getContainers(DirectoryResource rootDir) {
+        return getContainers(rootDir, null);
+    }
+
+    @Override
+    public List<PContainerResource> getContainers(DirectoryResource rootDir, String prefix) {
         List<Resource<?>> resources = getContainersDirectory(rootDir).listResources();
 
         List<PContainerResource> result = new ArrayList<>(resources.size());
@@ -76,7 +81,7 @@ public class ContainerUtilsImpl implements ContainerUtils {
             }
 
             if (pContainerResource != null) {
-                if (value == null || pContainerResource.getName().startsWith(value)) {
+                if (prefix == null || pContainerResource.getName().startsWith(prefix)) {
                     result.add(pContainerResource);
                 }
             }

@@ -32,7 +32,7 @@ public class ContainerChangeProfiles extends AbstractContainerCommand {
 
 	@Override
 	public void doInitializeUI(UIBuilder builder, Project project) throws Exception {
-		profiles.setValueChoices(profileUtils.getProfiles(project.getRoot().reify(DirectoryResource.class), ""))
+		profiles.setValueChoices(profileUtils.getProfiles(project.getRoot().reify(DirectoryResource.class)))
 			.setValueConverter(profileResourceConverter);
 		builder.add(profiles);
 	}

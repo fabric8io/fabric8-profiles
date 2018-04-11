@@ -18,11 +18,13 @@ package io.fabric8.profiles.forge.command.profileimport;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import io.fabric8.profiles.ProfilesHelpers;
+
 import org.jboss.forge.addon.ui.result.CompositeResult;
 import org.jboss.forge.addon.ui.result.Failed;
-import org.jboss.forge.addon.ui.result.Result;
 import org.junit.Before;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -46,10 +48,10 @@ public class ProfileImportUtilTest {
 
     @Test
     public void execute() throws Exception {
-        Result result = ProfileImportUtil.execute(ProfileImportUtil.getDefaultConfig(new Yaml()),
+        CompositeResult result = ProfileImportUtil.execute(ProfileImportUtil.getDefaultConfig(new Yaml()),
             Paths.get("target", "test-classes", "repos", "karafA", "profiles"),
-            testPath);
-        assertTrue(((CompositeResult)result).getResults().stream().filter( res -> res instanceof Failed ).count() == 0);
+            testPath, new HashMap<String, String>(), new ArrayList<>());
+        assertTrue(result.getResults().stream().noneMatch( res -> res instanceof Failed ));
     }
 
 }

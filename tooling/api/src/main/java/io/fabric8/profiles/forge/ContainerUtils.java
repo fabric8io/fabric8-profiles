@@ -29,7 +29,9 @@ public interface ContainerUtils {
 
     PContainerResource getContainer(DirectoryResource rootDir, String name);
 
-    List<PContainerResource> getContainers(DirectoryResource rootDir, String value);
+    List<PContainerResource> getContainers(DirectoryResource rootDir);
+
+    List<PContainerResource> getContainers(DirectoryResource rootDir, String prefix);
 
     PContainerResource createContainer(DirectoryResource rootDir, ContainerConfigDTO configDTO) throws IOException;
 }

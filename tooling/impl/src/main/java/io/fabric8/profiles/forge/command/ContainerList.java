@@ -1,5 +1,7 @@
 package io.fabric8.profiles.forge.command;
 
+import java.util.stream.Collectors;
+
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.context.UIExecutionContext;
@@ -23,6 +25,9 @@ public class ContainerList extends AbstractProfilesProjectCommand {
 
 	@Override
 	public Result execute(UIExecutionContext context) throws Exception {
-		return Results.success("Command 'pcontainer-list' successfully executed!");
+        final String containers = containerUtils.getContainers(getRoot(context)).stream()
+                .map(c -> c.getName()).collect(Collectors.joining(" "));
+        context.getUIContext().getProvider().getOutput().out().println(containers);
+        return Results.success();
 	}
 }

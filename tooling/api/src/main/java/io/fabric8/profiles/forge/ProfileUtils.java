@@ -28,6 +28,8 @@ public interface ProfileUtils {
 
     ProfileResource getProfile(DirectoryResource rootDir, String name);
 
+    List<ProfileResource> getProfiles(DirectoryResource rootDir);
+
     List<ProfileResource> getProfiles(DirectoryResource rootDir, String value);
 
     ProfileResource createProfile(DirectoryResource rootDir, String name, Iterable<ProfileResource> parents) throws IOException;
