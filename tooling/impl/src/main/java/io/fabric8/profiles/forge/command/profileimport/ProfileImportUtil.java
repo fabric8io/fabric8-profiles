@@ -21,10 +21,10 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import io.fabric8.profiles.containers.Constants;
+
+import org.jboss.forge.addon.ui.result.CompositeResult;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 import org.yaml.snakeyaml.Yaml;
@@ -40,11 +42,12 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
 import static java.nio.file.FileVisitResult.TERMINATE;
 
-public class ProfileImportUtil {
+public abstract class ProfileImportUtil {
 
     private static final String LATIN1_ENCODING = "8859-1";
 
-    public static Result execute(ProfileImportConfig config, Path dataDir, Path target) throws Exception {
+    public static CompositeResult execute(ProfileImportConfig config, Path dataDir, Path target,
+            Map<String, String> renamedProfiles, List<String> allProfiles) throws Exception {
 
         final String separator = dataDir.getFileSystem().getSeparator();
 	    List<Result> results = new ArrayList<>();
@@ -52,9 +55,8 @@ public class ProfileImportUtil {
         final int[] profiles = {0};
         final int[] resources = { 0 };
         final boolean[] failed = {false};
-	    Map<String, String> renamedProfiles = new HashMap<>();
 
-		// process profiles
+        // process profiles
 		Files.walkFileTree(dataDir, new SimpleFileVisitor<Path>() {
 
 			@Override
@@ -83,7 +85,7 @@ public class ProfileImportUtil {
                             result[0] = SKIP_SUBTREE;
                             if (logLevel != null) {
                                 String msg = resource.getLogMessage() == null ?
-                                    "Ignoring profile %s" : resource.getLogMessage();
+                                    "Ignoring resources under %s" : resource.getLogMessage();
                                 results.add(Results.success(String.format(logLevel + ": " + msg, name[0])));
                             }
                             break;
@@ -102,6 +104,20 @@ public class ProfileImportUtil {
                             }
                             break;
 
+                        case log:
+                            result[0] = CONTINUE;
+                            if (logLevel != null) {
+                                String msg = resource.getLogMessage() == null ?
+                                        "Resource %s" : resource.getLogMessage();
+                                if (logLevel == ProfileImportConfig.Level.FATAL) {
+                                    result[0] = TERMINATE;
+                                    results.add(Results.fail(String.format(logLevel + ": " + msg, name[0])));
+                                } else {
+                                    results.add(Results.success(String.format(logLevel + ": " + msg, name[0])));
+                                }
+                            }
+                            break;
+
                         case fail:
                             result[0] = TERMINATE;
                             String msg = resource.getLogMessage() == null ?
@@ -114,7 +130,8 @@ public class ProfileImportUtil {
                 });
 
                 if (result[0] == CONTINUE) {
-                    Files.copy(file, target.resolve((path[0].equals("") ? "" : path[0].replaceAll("-", separator) + separator) + name[0]));
+                    Files.copy(file, target.resolve((path[0].equals("") ? "" : path[0].replaceAll("-", separator) + separator) + name[0]),
+                            StandardCopyOption.REPLACE_EXISTING);
                     resources[0]++;
                 }
 				return result[0];
@@ -123,6 +140,7 @@ public class ProfileImportUtil {
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 final Path profilePath = dataDir.relativize(dir);
+                final String fullName = profilePath.toString().replace(separator, "-").replace(".profile", "");
                 final String[] name = {dir.getFileName().toString()};
                 final String[] path = {profilePath.toString().replace(separator, "-")};
 
@@ -139,7 +157,7 @@ public class ProfileImportUtil {
                             if (logLevel != null) {
                                 String msg = profile.getLogMessage() == null ?
                                     "Ignoring profile %s" : profile.getLogMessage();
-                                results.add(Results.success(String.format(logLevel + ": " + msg, name[0])));
+                                results.add(Results.success(String.format(logLevel + ": " + msg, fullName)));
                             }
                             break;
 
@@ -148,7 +166,7 @@ public class ProfileImportUtil {
                             if (logLevel != null) {
                                 String msg = profile.getLogMessage() == null ?
                                     "Renaming profile %s" : profile.getLogMessage();
-                                results.add(Results.success(String.format(logLevel + ": " + msg, name[0])));
+                                results.add(Results.success(String.format(logLevel + ": " + msg, fullName)));
                             }
                             String key = path[0];
                             if (!profile.getRegExp()) {
@@ -157,6 +175,20 @@ public class ProfileImportUtil {
                                 path[0] = path[0].replaceAll(profile.getName(), profile.getReplaceWith());
                             }
                             renamedProfiles.put(key, path[0]);
+                            break;
+
+                        case log:
+                            result[0] = CONTINUE;
+                            if (logLevel != null) {
+                                String msg = profile.getLogMessage() == null ?
+                                        "Profile %s" : profile.getLogMessage();
+                                if (logLevel == ProfileImportConfig.Level.FATAL) {
+                                    result[0] = TERMINATE;
+                                    results.add(Results.fail(String.format(logLevel + ": " + msg, name[0])));
+                                } else {
+                                    results.add(Results.success(String.format(logLevel + ": " + msg, name[0])));
+                                }
+                            }
                             break;
 
                         case fail:
@@ -171,10 +203,15 @@ public class ProfileImportUtil {
                 });
 
                 if (result[0] == CONTINUE) {
+                    // collect names of all copied profiles
+                    if (name[0].endsWith(".profile")) {
+                        allProfiles.add(path[0].replaceAll(".profile", ""));
+                        profiles[0]++;
+                    }
+
                     final Path copy = target.resolve(path[0].replace("-", separator));
                     if (Files.notExists(copy)) {
                         Files.createDirectories(copy);
-                        profiles[0]++;
                     }
                 }
 
@@ -270,8 +307,11 @@ public class ProfileImportUtil {
 
     private static boolean matches(String name, String path, ProfileImportConfig.ImportCommand profile) {
         final String profileName = profile.getName();
-        boolean matches = profileName.equals(name) || profileName.equals(path);
-        if (!matches && profile.getRegExp() && Pattern.matches(profileName, path)) {
+        final String fullProfileName = path.replaceAll(".profile", "");
+
+        boolean matches = profileName.equals(name) || profileName.equals(path) || profileName.equals(fullProfileName);
+        if (!matches && profile.getRegExp() &&
+                (Pattern.matches(profileName, path) || Pattern.matches(profileName, fullProfileName))) {
             matches = true;
         }
         return matches;

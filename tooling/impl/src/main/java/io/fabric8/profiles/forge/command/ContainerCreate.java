@@ -63,7 +63,7 @@ public class ContainerCreate extends AbstractProfilesProjectCommand {
 		Project project = getSelectedProjectOrNull(builder.getUIContext());
 
         profileResourceConverter.setProject(project);
-        profiles.setValueChoices(profileUtils.getProfiles(project.getRoot().reify(DirectoryResource.class), ""))
+        profiles.setValueChoices(profileUtils.getProfiles(project.getRoot().reify(DirectoryResource.class)))
 			.setValueConverter(profileResourceConverter)
             .setDefaultValue(Collections.singletonList(profileResourceConverter.convert(DEFAULT_PROFILES)));
 

@@ -15,7 +15,9 @@
  */
 package io.fabric8.profiles.forge;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -23,6 +25,7 @@ import org.jboss.forge.addon.convert.ConverterFactory;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ui.AbstractProjectCommand;
 import org.jboss.forge.addon.ui.controller.CommandController;
+import org.jboss.forge.addon.ui.output.UIMessage;
 import org.jboss.forge.addon.ui.result.CompositeResult;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.test.UITestHarness;
@@ -34,6 +37,7 @@ import org.junit.Assert;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Base class for command tests.
@@ -67,19 +71,23 @@ public abstract class AbstractProfilesTest {
             .addClass(ProjectHelper.class);
 	}
 
-    protected Project executeCommand(Project project, Class<? extends AbstractProjectCommand> commandClass, CommandInit commandInit, String success) throws Exception {
+    protected Project executeCommand(Project project, Class<? extends AbstractProjectCommand> commandClass, CommandInit commandInit, String... success) throws Exception {
         try(CommandController tester = uiTestHarness.createCommandController(commandClass, project.getRoot())) {
             tester.initialize();
 
             commandInit.init(tester);
-            assertTrue(tester.isValid());
+            final List<UIMessage> messages = tester.validate();
+            if (!messages.isEmpty()) {
+                fail(messages.toString());
+            }
 
             Result result = tester.execute();
             if (result instanceof CompositeResult) {
                 List<Result> results = ((CompositeResult) result).getResults();
-                assertEquals(success, results.get(results.size() - 1).getMessage());
+                final List<String> resultMessages = results.stream().map(Result::getMessage).collect(Collectors.toList());
+                assertTrue(Arrays.asList(success) + " not in " + resultMessages, Arrays.stream(success).allMatch( m -> resultMessages.contains(m)));
             } else {
-                assertEquals(success, result.getMessage());
+                assertEquals(success[0], result.getMessage());
             }
         }
         return projectHelper.refreshProject(project);
@@ -96,7 +104,7 @@ public abstract class AbstractProfilesTest {
             this.project = project;
         }
 
-        public CommandTest execute(Class<? extends AbstractProjectCommand> commandClass, AbstractProfilesTest.CommandInit commandInit, String success) throws Exception {
+        public CommandTest execute(Class<? extends AbstractProjectCommand> commandClass, AbstractProfilesTest.CommandInit commandInit, String... success) throws Exception {
             project = executeCommand(project, commandClass, commandInit, success);
             return this;
         }

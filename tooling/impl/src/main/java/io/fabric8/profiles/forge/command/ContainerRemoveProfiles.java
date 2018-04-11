@@ -31,7 +31,7 @@ public class ContainerRemoveProfiles extends AbstractContainerCommand {
 
 	@Override
 	public void doInitializeUI(UIBuilder builder, Project project) throws Exception {
-		profiles.setValueChoices(profileUtils.getProfiles(getRoot(project), ""))
+		profiles.setValueChoices(profileUtils.getProfiles(getRoot(project)))
 			.setValueConverter(profileResourceConverter.setProject(project));
 
 		builder.add(profiles);

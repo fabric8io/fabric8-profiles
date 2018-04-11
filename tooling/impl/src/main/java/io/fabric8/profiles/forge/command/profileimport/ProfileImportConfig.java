@@ -100,6 +100,7 @@ public class ProfileImportConfig {
 	public enum ImportAction {
 		delete,
 		rename,
+		log,
 		fail
 	}
 

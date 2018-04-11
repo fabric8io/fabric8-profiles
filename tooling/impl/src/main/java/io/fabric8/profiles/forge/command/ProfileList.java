@@ -1,5 +1,7 @@
 package io.fabric8.profiles.forge.command;
 
+import java.util.stream.Collectors;
+
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.context.UIExecutionContext;
@@ -9,7 +11,7 @@ import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Categories;
 import org.jboss.forge.addon.ui.util.Metadata;
 
-public class ProfileList extends AbstractProfilesCommand {
+public class ProfileList extends AbstractProfilesProjectCommand {
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
@@ -23,6 +25,9 @@ public class ProfileList extends AbstractProfilesCommand {
 
 	@Override
 	public Result execute(UIExecutionContext context) throws Exception {
-		return Results.success("Command 'profile-list' successfully executed!");
+		final String profiles = profileUtils.getProfiles(getRoot(context))
+				.stream().map(c -> c.getName()).collect(Collectors.joining(" "));
+		context.getUIContext().getProvider().getOutput().out().println(profiles);
+		return Results.success();
 	}
 }

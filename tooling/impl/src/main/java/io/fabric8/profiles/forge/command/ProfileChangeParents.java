@@ -31,7 +31,7 @@ public class ProfileChangeParents extends AbstractProfileCommand {
 
 	@Override
 	public void doInitializeUI(UIBuilder builder, Project project) {
-		parents.setValueChoices(profileUtils.getProfiles(getRoot(project), ""))
+		parents.setValueChoices(profileUtils.getProfiles(getRoot(project)))
 			.setValueConverter(profileResourceConverter.setProject(project));
 
 		builder.add(parents);

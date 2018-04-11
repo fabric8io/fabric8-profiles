@@ -37,7 +37,7 @@ public class ProfileCreate extends AbstractProfilesProjectCommand {
 	public void initializeUI(UIBuilder builder) throws Exception {
         Project project = getSelectedProjectOrNull(builder.getUIContext());
 
-        parents.setValueChoices(profileUtils.getProfiles(getRoot(project), ""))
+        parents.setValueChoices(profileUtils.getProfiles(getRoot(project)))
             .setValueConverter(profileResourceConverter.setProject(project))
             .setDefaultValue(Collections.singletonList(profileResourceConverter.convert("default")));
 

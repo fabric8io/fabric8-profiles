@@ -2,14 +2,19 @@
 
 profileCommands:
   -
-    name: "-(?<name>\\W)"
+    name: "fabric1(.profile)?"
     regExp: true
-    action: rename
-    replaceWith: "/${name}"
+    action: delete
     logLevel: INFO
-    logMessage: "Profile %s renamed, replacing '-' with '/'"
+    logMessage: "Profile %s ignored"
   -
     name: "fabric\\-ensemble\\-.*"
+    regExp: true
+    action: delete
+    logLevel: INFO
+    logMessage: "Profile %s ignored"
+  -
+    name: "jboss\\-fuse\\-.*"
     regExp: true
     action: delete
     logLevel: INFO
@@ -17,6 +22,6 @@ profileCommands:
 
 resourceCommands:
   -
-    name: "io.fabric8.agent.properties"
+    name: "io.fabric8.agent.properties1"
     action: rename
     replaceWith: "io.fabric8.profiles.properties"

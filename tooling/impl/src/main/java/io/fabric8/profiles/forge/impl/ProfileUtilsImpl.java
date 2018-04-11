@@ -45,6 +45,11 @@ public class ProfileUtilsImpl implements ProfileUtils {
     }
 
     @Override
+    public List<ProfileResource> getProfiles(DirectoryResource rootDir) {
+        return getProfiles(rootDir, null);
+    }
+
+    @Override
     public List<ProfileResource> getProfiles(DirectoryResource rootDir, String value) {
         DirectoryResource profilesDir = getProfilesDirectory(rootDir);
         List<ProfileResource> resources = resourceUtils.findRecursive(profilesDir, res -> res.getResourceFactory().create(ProfileResource.class, (File) res.getUnderlyingResourceObject()));
