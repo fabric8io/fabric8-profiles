@@ -1,3 +1,0 @@
-  container:
-    profiles: fabric fabric-ensemble-0000-1 jboss-fuse-full
-    container-type: karaf jenkinsfile

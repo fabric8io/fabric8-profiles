@@ -1,1 +1,0 @@
-Camel using mutliple EIPs into a single solution

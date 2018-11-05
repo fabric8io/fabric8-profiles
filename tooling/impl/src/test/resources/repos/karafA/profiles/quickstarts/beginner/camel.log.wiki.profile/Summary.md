@@ -1,1 +1,0 @@
-Camel Log Example (wiki)

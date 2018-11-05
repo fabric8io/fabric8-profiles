@@ -1,1 +1,0 @@
-ActiveMQ and Camel Example

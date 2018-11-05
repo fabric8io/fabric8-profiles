@@ -1,1 +1,0 @@
-Camel Content-Based Router Example

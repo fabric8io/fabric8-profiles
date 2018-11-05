@@ -1,3 +1,0 @@
-  container:
-    profiles: example-config-mapB
-    container-type: fabric8-resources jenkinsfile
