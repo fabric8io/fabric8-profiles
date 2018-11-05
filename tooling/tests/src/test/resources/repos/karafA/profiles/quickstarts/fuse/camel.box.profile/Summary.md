@@ -1,1 +1,0 @@
-Camel Box.com Example

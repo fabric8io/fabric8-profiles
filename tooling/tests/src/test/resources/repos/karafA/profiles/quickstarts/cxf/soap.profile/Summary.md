@@ -1,1 +1,0 @@
-SOAP example using JAXWS
